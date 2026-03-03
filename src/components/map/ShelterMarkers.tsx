@@ -28,6 +28,9 @@ function ShelterPopup({ shelter }: { shelter: Shelter }) {
 
 export function ShelterMarkers() {
   const shelters = useRouteStore((s) => s.shelters);
+  const highlightedSegmentIdx = useRouteStore((s) => s.highlightedSegmentIdx);
+
+  if (highlightedSegmentIdx !== null) return null;
 
   return (
     <>

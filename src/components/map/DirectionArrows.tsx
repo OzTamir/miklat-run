@@ -51,7 +51,8 @@ export function DirectionArrows() {
     <>
       {computedSegments.map((seg, segIdx) => {
         const isVisible =
-          highlightedSegmentIdx === null || highlightedSegmentIdx === segIdx;
+          highlightedSegmentIdx === null ||
+          highlightedSegmentIdx === seg.index;
 
         if (!isVisible) return null;
 

@@ -41,20 +41,22 @@ export function RouteLayer() {
     <>
       {computedSegments.map((seg, segIdx) => {
         const colorGroups = groupByColor(seg.safetyPoints);
-        const isHighlighted = highlightedSegmentIdx === segIdx;
+        const isHighlighted = highlightedSegmentIdx === seg.index;
         const isDimmed =
-          highlightedSegmentIdx !== null && highlightedSegmentIdx !== segIdx;
+          highlightedSegmentIdx !== null && highlightedSegmentIdx !== seg.index;
 
         return colorGroups.map((group, groupIdx) => (
           <Polyline
             key={`seg-${segIdx}-grp-${groupIdx}`}
             positions={group.positions}
-            color={group.color}
-            weight={isHighlighted ? 7 : 5}
-            opacity={isDimmed ? 0.2 : isHighlighted ? 1.0 : 0.85}
-            lineCap="round"
-            lineJoin="round"
-            eventHandlers={{ click: () => highlightSegment(segIdx) }}
+            pathOptions={{
+              color: group.color,
+              weight: isHighlighted ? 7 : 5,
+              opacity: isDimmed ? 0.25 : isHighlighted ? 1.0 : 0.85,
+              lineCap: 'round',
+              lineJoin: 'round',
+            }}
+            eventHandlers={{ click: () => highlightSegment(seg.index) }}
           />
         ));
       })}

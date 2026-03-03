@@ -22,7 +22,7 @@ export function SegmentMarkers() {
     <>
       {computedSegments.map((seg, idx) => {
         const isVisible =
-          highlightedSegmentIdx === null || highlightedSegmentIdx === idx;
+          highlightedSegmentIdx === null || highlightedSegmentIdx === seg.index;
 
         if (!isVisible) return null;
 
@@ -31,7 +31,7 @@ export function SegmentMarkers() {
             key={`seg-marker-${idx}`}
             position={[seg.midCoord.lat, seg.midCoord.lng]}
             icon={createSegIcon(idx)}
-            eventHandlers={{ click: () => highlightSegment(idx) }}
+            eventHandlers={{ click: () => highlightSegment(seg.index) }}
           />
         );
       })}

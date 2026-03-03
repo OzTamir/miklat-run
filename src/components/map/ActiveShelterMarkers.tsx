@@ -10,19 +10,27 @@ const GRID_SIZE = 0.003;
 export function ActiveShelterMarkers() {
   const shelters = useRouteStore((s) => s.shelters);
   const computedSegments = useRouteStore((s) => s.computedSegments);
+  const highlightedSegmentIdx = useRouteStore((s) => s.highlightedSegmentIdx);
 
   const activeShelters = useMemo(() => {
     if (computedSegments.length === 0) return [];
 
-    const allRouteCoords: [number, number][] = computedSegments.flatMap(
-      (seg) => seg.polyCoords,
-    );
-    if (allRouteCoords.length === 0) return [];
+    const routeCoords: [number, number][] =
+      highlightedSegmentIdx !== null
+        ? (() => {
+            const seg = computedSegments.find(
+              (s) => s.index === highlightedSegmentIdx,
+            );
+            return seg ? seg.polyCoords : [];
+          })()
+        : computedSegments.flatMap((seg) => seg.polyCoords);
+
+    if (routeCoords.length === 0) return [];
 
     const shelterGrid = buildGrid(shelters);
     const activeIds = new Set<number>();
 
-    for (const [lat, lng] of allRouteCoords) {
+    for (const [lat, lng] of routeCoords) {
       const gx = Math.floor(lng / GRID_SIZE);
       const gy = Math.floor(lat / GRID_SIZE);
 
@@ -41,7 +49,7 @@ export function ActiveShelterMarkers() {
     }
 
     return shelters.filter((s) => activeIds.has(s.id));
-  }, [shelters, computedSegments]);
+  }, [shelters, computedSegments, highlightedSegmentIdx]);
 
   if (computedSegments.length === 0) return null;
 
