@@ -31,7 +31,7 @@ export function RouteOverview() {
     <>
       {/* Desktop: left slide panel */}
       <div
-        className={`absolute top-0 bottom-0 left-0 z-[15] hidden w-[320px] flex-col border-r border-white/[0.06] bg-bg-surface transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] md:flex ${
+        className={`fixed inset-y-0 left-0 z-20 hidden w-[320px] flex-col border-r border-white/[0.06] bg-bg-surface shadow-[8px_0_32px_rgba(0,0,0,0.25)] transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] md:flex ${
           overviewVisible
             ? 'translate-x-0'
             : '-translate-x-full'
@@ -59,7 +59,7 @@ export function RouteOverview() {
 
       {/* Mobile: bottom sheet */}
       <div
-        className={`fixed inset-x-0 bottom-0 z-[15] flex max-h-[65vh] flex-col rounded-t-2xl border-t border-white/[0.08] bg-bg-surface transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] md:hidden ${
+        className={`fixed inset-x-0 bottom-0 z-30 flex max-h-[65vh] flex-col rounded-t-2xl border-t border-white/[0.08] bg-bg-surface transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] md:hidden ${
           overviewVisible
             ? 'translate-y-0'
             : 'translate-y-full'

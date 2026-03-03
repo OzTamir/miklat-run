@@ -44,7 +44,7 @@ function App() {
     >
       <RouteOverview />
 
-      <main className="absolute inset-0 md:right-[340px]">
+      <main className="absolute inset-0 z-0 md:right-[340px]">
         <MapView />
       </main>
 
