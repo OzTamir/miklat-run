@@ -52,7 +52,7 @@ export function RouteInfo() {
         <div className="rounded-lg bg-bg-surface-2 px-3 py-3 text-center">
           <div className="text-xl font-bold text-text-primary">{timeMin}</div>
           <div className="text-[12px] text-text-muted">
-            {`דקות (קצב ${paceMin}:${paceSec.toString().padStart(2, '0')})`}
+            {`דקות (${paceMin}:${paceSec.toString().padStart(2, '0')} לק"מ)`}
           </div>
         </div>
       </div>
