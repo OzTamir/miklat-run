@@ -142,3 +142,4 @@ vite.config.ts.timestamp-*
 tmp
 
 safe.html
+.vite
