@@ -2,8 +2,8 @@ import { useRouteStore } from '@/stores/route-store';
 import type { RouteMode } from '@/types';
 
 const MODES: { value: RouteMode; label: string }[] = [
-  { value: 'distance', label: '\u05DC\u05E4\u05D9 \u05DE\u05E8\u05D7\u05E7' },
-  { value: 'pace', label: '\u05DC\u05E4\u05D9 \u05E7\u05E6\u05D1 + \u05D6\u05DE\u05DF' },
+  { value: 'distance', label: 'לפי מרחק' },
+  { value: 'pace', label: 'לפי קצב + זמן' },
 ];
 
 export function ModeToggle() {

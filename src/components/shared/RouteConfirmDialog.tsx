@@ -49,25 +49,25 @@ export function RouteConfirmDialog({
       >
         <AlertDialogHeader className="sm:place-items-center sm:text-center">
           <div className="text-[36px] leading-none mb-3">
-            {'\uD83C\uDFC3'}
+            {'🏃'}
           </div>
           <AlertDialogTitle className="text-lg font-semibold text-text-primary">
-            {'\u05D4\u05DE\u05E1\u05DC\u05D5\u05DC \u05E9\u05E0\u05DE\u05E6\u05D0 \u05E9\u05D5\u05E0\u05D4 \u05DE\u05D4\u05D1\u05E7\u05E9\u05D4'}
+            {'המסלול שנמצא שונה מהבקשה'}
           </AlertDialogTitle>
           <AlertDialogDescription className="text-sm text-text-secondary leading-relaxed">
-            {'\u05D1\u05D9\u05E7\u05E9\u05EA '}
+            {'בקשות '}
             <strong>
-              {targetKm} {'\u05E7"\u05DE'}
+              {targetKm} {'ק"מ'}
             </strong>
-            {', \u05D4\u05DE\u05E1\u05DC\u05D5\u05DC \u05D4\u05D8\u05D5\u05D1 \u05D1\u05D9\u05D5\u05EA\u05E8 \u05E9\u05E0\u05DE\u05E6\u05D0 \u05D4\u05D5\u05D0 '}
+            {', המסלול הטוב ביותר שנמצא הוא '}
             <strong>
-              {bestKmDisplay} {'\u05E7"\u05DE'}
+              {bestKmDisplay} {'ק"מ'}
             </strong>
-            {` (${diffSign}${diff} ${'\u05E7"\u05DE'})`}
+            {` (${diffSign}${diff} ${'ק"מ'})`}
             <br />
-            {'\u05D6\u05DE\u05DF \u05DE\u05E9\u05D5\u05E2\u05E8: '}
+            {'זמן משוער: '}
             {bestTime}
-            {' \u05D3\u05E7\u05D5\u05EA'}
+            {' דקות'}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -79,7 +79,7 @@ export function RouteConfirmDialog({
               onAction('accept');
             }}
           >
-            {'\u05D6\u05D4 \u05DE\u05E1\u05E4\u05D9\u05E7 \u05D8\u05D5\u05D1, \u05D4\u05E6\u05D2 \u05DE\u05E1\u05DC\u05D5\u05DC'}
+            {'זה מספיק טוב, הצג מסלול'}
           </AlertDialogAction>
 
           <div className="flex flex-col items-stretch gap-0.5">
@@ -92,13 +92,13 @@ export function RouteConfirmDialog({
               }}
             >
               {isRetry
-                ? '\u05E0\u05E1\u05D4 \u05E9\u05D5\u05D1 (\u05D7\u05D9\u05E4\u05D5\u05E9 \u05DE\u05D5\u05E8\u05D7\u05D1)'
-                : '\u05D7\u05E4\u05E9 \u05D9\u05D5\u05EA\u05E8'}
+                ? 'נסה שוב (חיפוש מורחב)'
+                : 'חפש יתר'}
             </AlertDialogAction>
             <p className="text-[11px] text-text-muted text-center">
               {isRetry
-                ? '\u05DB\u05D1\u05E8 \u05D7\u05D9\u05E4\u05E9\u05E0\u05D5 \u05D1\u05D9\u05E1\u05D5\u05D3\u05D9\u05D5\u05EA \u2014 \u05D9\u05D9\u05EA\u05DB\u05DF \u05E9\u05D6\u05D4 \u05D4\u05D8\u05D5\u05D1 \u05D1\u05D9\u05D5\u05EA\u05E8 \u05DC\u05D0\u05D6\u05D5\u05E8 \u05D4\u05D6\u05D4'
-                : '\u05E0\u05E0\u05E1\u05D4 \u05D2\u05D9\u05E9\u05D5\u05EA \u05E0\u05D5\u05E1\u05E4\u05D5\u05EA \u05DC\u05DE\u05E6\u05D9\u05D0\u05EA \u05DE\u05E1\u05DC\u05D5\u05DC \u05DE\u05D3\u05D5\u05D9\u05E7 \u05D9\u05D5\u05EA\u05E8'}
+                ? 'כבר חיפשנו ביסודיות — ייתכן שזה הטוב ביותר לאזור הזה'
+                : 'ננסה גישה נוספת למציאת מסלול מדויק יותר'}
             </p>
           </div>
 
@@ -110,7 +110,7 @@ export function RouteConfirmDialog({
               onAction('cancel');
             }}
           >
-            {'\u05D1\u05D9\u05D8\u05D5\u05DC'}
+            {'ביטול'}
           </AlertDialogCancel>
         </AlertDialogFooter>
       </AlertDialogContent>

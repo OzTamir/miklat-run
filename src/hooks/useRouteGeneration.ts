@@ -68,7 +68,7 @@ export function useRouteGeneration(): UseRouteGenerationReturn {
 
     setIsRetry(isRetryAttempt);
     setIsGenerating(true);
-    setLoading(true, '\u05DE\u05D7\u05E4\u05E9 \u05DE\u05E7\u05DC\u05D8\u05D9\u05DD \u05D1\u05E7\u05E8\u05D1\u05EA \u05DE\u05E7\u05D5\u05DD...');
+    setLoading(true, 'מחפש מקלטים בקרבת מקום...');
 
     try {
       const targetKm =
@@ -85,7 +85,7 @@ export function useRouteGeneration(): UseRouteGenerationReturn {
 
       if (!result) {
         toast.error(
-          '\u05DC\u05D0 \u05E0\u05D9\u05EA\u05DF \u05DC\u05D7\u05E9\u05D1 \u05DE\u05E1\u05DC\u05D5\u05DC. \u05E0\u05E1\u05D4 \u05E0\u05E7\u05D5\u05D3\u05EA \u05D4\u05EA\u05D7\u05DC\u05D4 \u05D0\u05D7\u05E8\u05EA.',
+          'לא נתן לחשב מסלול. נסה נקודת התחלה אחרת.',
         );
         return;
       }
@@ -99,7 +99,7 @@ export function useRouteGeneration(): UseRouteGenerationReturn {
       setIsRetry(false);
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : '\u05E9\u05D2\u05D9\u05D0\u05D4 \u05D1\u05D7\u05D9\u05E9\u05D5\u05D1 \u05D4\u05DE\u05E1\u05DC\u05D5\u05DC';
+        err instanceof Error ? err.message : 'שגיאה בחישוב המסלול';
       toast.error(message);
     } finally {
       setIsGenerating(false);

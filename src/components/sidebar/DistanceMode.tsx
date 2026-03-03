@@ -15,7 +15,7 @@ export function DistanceMode() {
           {targetDistanceKm}
         </span>
         <span className="mr-1 text-lg text-text-secondary">
-          {'\u05E7"\u05DE'}
+          {'ק"מ'}
         </span>
       </div>
 
@@ -30,8 +30,8 @@ export function DistanceMode() {
       />
 
       <div className="flex justify-between text-[12px] text-text-muted">
-        <span>{'\u05E7"\u05DE 1'}</span>
-        <span>{'\u05E7"\u05DE 15'}</span>
+        <span>{'ק"מ 1'}</span>
+        <span>{'ק"מ 15'}</span>
       </div>
     </div>
   );

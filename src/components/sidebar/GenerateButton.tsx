@@ -10,7 +10,7 @@ export function GenerateButton() {
     <Button
       onClick={generate}
       disabled={!canGenerate() || isGenerating}
-      className="h-11 w-full bg-accent text-[15px] font-semibold text-white shadow-[0_4px_16px_rgba(232,145,58,0.25)] transition-all hover:bg-accent-hover disabled:opacity-40 disabled:shadow-none flex-row-reverse gap-2"
+      className="h-11 w-full bg-accent text-[15px] font-semibold text-white shadow-[0_4px_16px_rgba(232,145,58,0.25)] transition-all hover:bg-accent-hover disabled:opacity-40 disabled:shadow-none flex-row gap-2"
     >
       {isGenerating ? (
         <svg
@@ -35,7 +35,7 @@ export function GenerateButton() {
         </svg>
       ) : (
         <>
-          {'\u05E6\u05D5\u05E8 \u05DE\u05E1\u05DC\u05D5\u05DC'}
+          {'צור מסלול'}
           <svg
             width="18"
             height="18"
@@ -46,6 +46,7 @@ export function GenerateButton() {
             strokeLinecap="round"
             strokeLinejoin="round"
             aria-hidden
+            className="rotate-180 translate-x-1"
           >
             <path d="M5 12h14M12 5l7 7-7 7" />
           </svg>

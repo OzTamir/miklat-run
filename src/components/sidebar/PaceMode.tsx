@@ -30,7 +30,7 @@ export function PaceMode() {
     <div className="mt-4 space-y-4">
       <div className="space-y-2">
         <div className="text-[12px] font-medium text-text-secondary">
-          {'\u05E7\u05E6\u05D1 (\u05D3\u05E7\u0027/\u05E7"\u05DE)'}
+          {"קצב (דק'/ק\"מ)"}
         </div>
         <div className="flex items-center justify-center gap-1">
           <input
@@ -56,12 +56,12 @@ export function PaceMode() {
 
       <div className="space-y-2">
         <div className="text-[12px] font-medium text-text-secondary">
-          {'\u05D6\u05DE\u05DF \u05E8\u05D9\u05E6\u05D4 (\u05D3\u05E7\u05D5\u05EA)'}
+          {'זמן ריצה (דקות)'}
         </div>
         <div className="text-center">
           <span className="text-2xl font-bold text-accent">{timeMinutes}</span>
           <span className="mr-1 text-lg text-text-secondary">
-            {'\u05D3\u05E7\u0027'}
+            {'דק\''}
           </span>
         </div>
 
@@ -76,15 +76,15 @@ export function PaceMode() {
         />
 
         <div className="flex justify-between text-[12px] text-text-muted">
-          <span>{"\u05D3\u05E7' 10"}</span>
-          <span>{"\u05D3\u05E7' 90"}</span>
+          <span>{"דק' 10"}</span>
+          <span>{"דק' 90"}</span>
         </div>
       </div>
 
       <div className="rounded-lg bg-accent-dim px-3 py-2.5 text-center text-[13px] text-text-primary">
-        {'\u05DE\u05E8\u05D7\u05E7 \u05DE\u05E9\u05D5\u05E2\u05E8: '}
+        {'מרחק משוער: '}
         <strong className="text-accent">
-          {computedDistanceKm().toFixed(1)} {'\u05E7"\u05DE'}
+          {computedDistanceKm().toFixed(1)} {'ק"מ'}
         </strong>
       </div>
     </div>

@@ -108,30 +108,30 @@ function OverviewHeader({
     <div className="flex shrink-0 items-center justify-between border-b border-white/[0.06] bg-bg px-5 py-4">
       <div className="flex flex-col gap-1 text-start">
         <h2 className="text-[16px] font-semibold text-text-primary">
-          {'\u05E1\u05E7\u05D9\u05E8\u05EA \u05D4\u05DE\u05E1\u05DC\u05D5\u05DC'}
+          {'סקירת המסלול'}
         </h2>
         <div className="flex gap-3 text-[12px] text-text-secondary">
           <span className="flex items-center gap-1">
             <span className="font-semibold text-accent">{distKm}</span>
-            {'\u05E7"\u05DE'}
+            {'ק"מ'}
           </span>
           <span className="flex items-center gap-1">
             <span className="font-semibold text-accent">{timeMin}</span>
-            {'\u05D3\u05E7\u05F3'}
+            {'דק׳'}
           </span>
           <span className="flex items-center gap-1">
             <span className="font-semibold text-accent">{safePercent}%</span>
-            {'\u05D1\u05D8\u05D5\u05D7'}
+            {'בטוח'}
           </span>
         </div>
       </div>
       <button
         type="button"
         onClick={onClose}
-        title={'\u05E1\u05D2\u05D5\u05E8'}
+        title={'סגור'}
         className="flex size-8 shrink-0 items-center justify-center rounded-md bg-bg-surface-2 text-[18px] text-text-secondary transition-colors duration-150 hover:bg-bg-surface-3 hover:text-text-primary"
       >
-        {'\u2715'}
+        {'×'}
       </button>
     </div>
   );

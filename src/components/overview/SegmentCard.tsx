@@ -22,10 +22,10 @@ export function SegmentCard({ segment, isActive, onClick }: SegmentCardProps) {
             className="inline-block size-[10px] shrink-0 rounded-full"
             style={{ background: segment.color }}
           />
-          {'\u05E7\u05D8\u05E2'} {segment.index + 1}
+          {'קטע'} {segment.index + 1}
         </div>
         <span className="text-[12px] text-text-muted">
-          {segment.distance} {'\u05DE\u05F3'}
+          {segment.distance} {'מ׳'}
         </span>
       </div>
 
@@ -44,7 +44,7 @@ export function SegmentCard({ segment, isActive, onClick }: SegmentCardProps) {
         </svg>
         <span>
           {segment.direction}
-          {segment.streetName ? ` \u2014 ${segment.streetName}` : ''}
+          {segment.streetName ? ` – ${segment.streetName}` : ''}
         </span>
       </div>
 
@@ -64,8 +64,8 @@ export function SegmentCard({ segment, isActive, onClick }: SegmentCardProps) {
         </svg>
         <span>
           {segment.nearestShelter
-            ? `${segment.nearestShelter.address} \u2014 ${segment.nearestShelterDist} \u05DE\u05F3`
-            : '\u05DC\u05D0 \u05E0\u05DE\u05E6\u05D0 \u05DE\u05E7\u05DC\u05D8 \u05E7\u05E8\u05D5\u05D1'}
+            ? `${segment.nearestShelter.address} – ${segment.nearestShelterDist} מ׳`
+            : 'לא נמצא מקלט קרוב'}
         </span>
       </div>
     </button>
