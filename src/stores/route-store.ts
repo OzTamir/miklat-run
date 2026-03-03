@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { trackEvent } from '@/lib/analytics';
 import type {
   LatLng,
   RouteMode,
@@ -88,10 +89,15 @@ export const useRouteStore = create<RouteState>()(
 
   shelters: SHELTERS,
 
-  setStartPoint: (latlng, address) =>
-    set({ startLatLng: latlng, startAddress: address ?? '' }),
+  setStartPoint: (latlng, address) => {
+    set({ startLatLng: latlng, startAddress: address ?? '' });
+    trackEvent('Start Point Set');
+  },
 
-  setRouteMode: (mode) => set({ routeMode: mode }),
+  setRouteMode: (mode) => {
+    set({ routeMode: mode });
+    trackEvent('Route Mode Changed', { mode });
+  },
 
   setTargetDistance: (km) => set({ targetDistanceKm: km }),
 
@@ -109,15 +115,20 @@ export const useRouteStore = create<RouteState>()(
       highlightedSegmentIdx: null,
     }),
 
-  clearRoute: () =>
+  clearRoute: () => {
     set({
       routeData: null,
       computedSegments: [],
       highlightedSegmentIdx: null,
       overviewVisible: false,
-    }),
+    });
+    trackEvent('Route Cleared');
+  },
 
-  highlightSegment: (idx) => set({ highlightedSegmentIdx: idx }),
+  highlightSegment: (idx) => {
+    set({ highlightedSegmentIdx: idx });
+    if (idx !== null) trackEvent('Segment Selected');
+  },
 
   resetSegmentHighlight: () => set({ highlightedSegmentIdx: null }),
 
@@ -127,7 +138,10 @@ export const useRouteStore = create<RouteState>()(
   toggleSidebar: () =>
     set((state) => ({ sidebarExpanded: !state.sidebarExpanded })),
 
-  setOverviewVisible: (visible) => set({ overviewVisible: visible }),
+  setOverviewVisible: (visible) => {
+    set({ overviewVisible: visible });
+    if (visible) trackEvent('Overview Opened');
+  },
 
   computedDistanceKm: () => {
     const { timeMinutes, paceMin, paceSec } = get();

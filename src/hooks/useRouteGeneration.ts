@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { toast } from 'sonner';
 import { create } from 'zustand';
 import { useRouteStore } from '@/stores/route-store';
+import { trackEvent } from '@/lib/analytics';
 import { generateRoute, buildLogicalSegments } from '@/lib/routing';
 import type { GenerateRouteResult } from '@/lib/routing';
 
@@ -59,6 +60,7 @@ export function useRouteGeneration(): UseRouteGenerationReturn {
         shelters,
       );
       setRouteResult(routeData, segments);
+      trackEvent('Route Generated');
     },
     [shelters, setRouteResult],
   );
@@ -91,6 +93,7 @@ export function useRouteGeneration(): UseRouteGenerationReturn {
       }
 
       if (result.needsConfirmation) {
+        trackEvent('Route Confirmation Shown');
         setConfirmationData(result);
         return;
       }
@@ -118,6 +121,7 @@ export function useRouteGeneration(): UseRouteGenerationReturn {
 
   const handleConfirmation = useCallback(
     (action: 'accept' | 'retry' | 'cancel') => {
+      trackEvent('Route Confirmation', { action });
       if (action === 'accept' && confirmationData) {
         applyRoute(confirmationData);
         setIsRetry(false);
