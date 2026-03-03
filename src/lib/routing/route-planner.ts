@@ -185,17 +185,15 @@ export function bridgeShelters(
       const dToTarget = haversine(s.lat, s.lng, to.lat, to.lng);
 
       if (dFromCurr <= maxEdge && dFromCurr > 30) {
-        const progress = distToTarget - dToTarget;
-        if (progress > 0) {
-          bestScore = progress;
-          best = s;
-        }
-      }
-    }
+         const progress = distToTarget - dToTarget;
+         if (progress > bestScore) {
+           bestScore = progress;
+           best = s;
+         }
+       }
+     }
 
-    void bestScore;
-
-    if (!best) {
+     if (!best) {
       break;
     }
     result.push(best);
@@ -203,5 +201,18 @@ export function bridgeShelters(
     current = best;
   }
 
-  return result;
+   return result;
+}
+
+export function scaleWaypoints(start: LatLng, waypoints: LatLng[], factor: number): LatLng[] {
+  return waypoints.map(wp => {
+    // If this waypoint IS the start point, keep it unchanged
+    if (Math.abs(wp.lat - start.lat) < 0.000001 && Math.abs(wp.lng - start.lng) < 0.000001) {
+      return wp;
+    }
+    return {
+      lat: start.lat + (wp.lat - start.lat) * factor,
+      lng: start.lng + (wp.lng - start.lng) * factor,
+    };
+  });
 }

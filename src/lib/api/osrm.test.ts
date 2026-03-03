@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { LatLng, OSRMStep, RouteData } from '@/types'
-import { getOSRMRoute } from './osrm'
+import { getOSRMRoute, getOSRMTrip, getOSRMRouteOrTrip, resetTripDetection } from './osrm'
 
 const mockFetch = vi.fn()
 globalThis.fetch = mockFetch as unknown as typeof fetch
@@ -19,7 +19,7 @@ function getCalledUrl(): string {
 }
 
 function getCoordsFromUrl(url: string): string[] {
-  const coordsSection = url.split('/route/v1/foot/')[1].split('?')[0]
+  const coordsSection = url.split(/\/(route|trip)\/v1\/foot\//)[2].split('?')[0]
   return coordsSection.split(';')
 }
 
@@ -43,6 +43,7 @@ const defaultRoute: RouteData = {
 
 beforeEach(() => {
   mockFetch.mockReset()
+  resetTripDetection()
 })
 
 afterEach(() => {
@@ -200,5 +201,88 @@ describe('getOSRMRoute', () => {
       'Insufficient waypoints for route',
     )
     expect(mockFetch).not.toHaveBeenCalled()
+  })
+})
+
+describe('getOSRMTrip', () => {
+  it('constructs trip URL with source=first&roundtrip=true', async () => {
+    const waypoints: LatLng[] = [
+      { lat: 32.08, lng: 34.78 },
+      { lat: 32.09, lng: 34.79 },
+      { lat: 32.08, lng: 34.78 },
+    ]
+    mockFetchResponse({ code: 'Ok', trips: [{ geometry: defaultRoute.geometry, distance: 5000, duration: 3600, legs: [] }] })
+
+    await getOSRMTrip(waypoints)
+
+    expect(mockFetch).toHaveBeenCalledTimes(1)
+    const url = getCalledUrl()
+    expect(url).toContain('/trip/v1/foot/')
+    expect(url).toContain('source=first')
+    expect(url).toContain('roundtrip=true')
+  })
+
+  it('parses trips[0] from response', async () => {
+    const step = { distance: 120, duration: 90, name: 'Street', maneuver: { type: 'turn', bearing_before: 10, bearing_after: 20 } }
+    mockFetchResponse({
+      code: 'Ok',
+      trips: [{
+        geometry: defaultRoute.geometry,
+        distance: 5000,
+        duration: 3600,
+        legs: [{ steps: [step] }],
+      }],
+    })
+
+    const result = await getOSRMTrip([
+      { lat: 32.08, lng: 34.78 },
+      { lat: 32.09, lng: 34.79 },
+      { lat: 32.08, lng: 34.78 },
+    ])
+
+    expect(result.geometry).toEqual(defaultRoute.geometry)
+    expect(result.distance).toBe(5000)
+    expect(result.steps).toEqual([step])
+  })
+
+  it('throws when trips array is empty', async () => {
+    mockFetchResponse({ code: 'Ok', trips: [] })
+
+    await expect(getOSRMTrip([
+      { lat: 32.08, lng: 34.78 },
+      { lat: 32.09, lng: 34.79 },
+    ])).rejects.toThrow('לא נמצא מסלול')
+  })
+})
+
+describe('getOSRMRouteOrTrip', () => {
+  it('returns trip result when trip succeeds', async () => {
+    mockFetchResponse({ code: 'Ok', trips: [{ geometry: defaultRoute.geometry, distance: 5000, duration: 3600, legs: [] }] })
+
+    const result = await getOSRMRouteOrTrip([
+      { lat: 32.08, lng: 34.78 },
+      { lat: 32.09, lng: 34.79 },
+      { lat: 32.08, lng: 34.78 },
+    ])
+
+    expect(result.distance).toBe(5000)
+    const url = getCalledUrl()
+    expect(url).toContain('/trip/v1/foot/')
+  })
+
+  it('falls back to route when trip fails', async () => {
+    // First call (trip) fails
+    mockFetch.mockResolvedValueOnce({ ok: false, status: 400, json: () => Promise.resolve({}) })
+    // Second call (route) succeeds
+    mockFetchResponse({ code: 'Ok', routes: [{ geometry: defaultRoute.geometry, distance: 5000, duration: 3600, legs: [] }] })
+
+    const result = await getOSRMRouteOrTrip([
+      { lat: 32.08, lng: 34.78 },
+      { lat: 32.09, lng: 34.79 },
+      { lat: 32.08, lng: 34.78 },
+    ])
+
+    expect(mockFetch).toHaveBeenCalledTimes(2)
+    expect(result.distance).toBe(5000)
   })
 })
