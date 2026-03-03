@@ -5,12 +5,31 @@ import { useRouteStore } from '@/stores/route-store';
 
 const PADDING = 40;
 const OVERVIEW_WIDTH_PX = 320;
+const MD_BREAKPOINT = 768;
+const MAX_SEGMENT_ZOOM = 17;
+
+function isMobile() {
+  return window.innerWidth < MD_BREAKPOINT;
+}
 
 function getFitBoundsPadding(overviewVisible: boolean): L.FitBoundsOptions {
+  const base: L.FitBoundsOptions = { maxZoom: MAX_SEGMENT_ZOOM };
+
   if (!overviewVisible) {
-    return { padding: [PADDING, PADDING] };
+    return { ...base, padding: [PADDING, PADDING] };
   }
+
+  if (isMobile()) {
+    const bottomSheetPx = window.innerHeight * 0.5;
+    return {
+      ...base,
+      paddingTopLeft: [PADDING, PADDING],
+      paddingBottomRight: [PADDING, bottomSheetPx + PADDING],
+    };
+  }
+
   return {
+    ...base,
     paddingTopLeft: [OVERVIEW_WIDTH_PX + PADDING, PADDING],
     paddingBottomRight: [PADDING, PADDING],
   };

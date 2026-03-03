@@ -29,7 +29,7 @@ export function SidebarFooter() {
         >
           {'נבנה '}
           <span className="line-through opacity-50">{'ב❤️'}</span>
-          {' מהמקלט על ידי עוז תמיר'}
+          {' במקלט על ידי עוז תמיר'}
         </a>
         <span className="text-[12px] text-text-secondary">|</span>
         <a
