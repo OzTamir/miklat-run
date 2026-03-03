@@ -7,3 +7,4 @@ export { BiasToggle } from './BiasToggle';
 export { GenerateButton } from './GenerateButton';
 export { RouteInfo } from './RouteInfo';
 export { HowItWorks } from './HowItWorks';
+export { SidebarFooter } from './SidebarFooter';
