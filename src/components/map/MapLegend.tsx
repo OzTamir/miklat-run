@@ -6,6 +6,11 @@ export function MapLegend() {
     >
       <div className="flex flex-col gap-1.5 text-sm max-md:gap-1 max-md:text-[11px]">
         <LegendItem>
+          <span className="inline-block size-3 shrink-0 rounded-full border-2 border-white bg-green-500" />
+          <span>נקודת התחלה</span>
+        </LegendItem>
+
+        <LegendItem>
           <span className="inline-block size-3 shrink-0 rounded-full bg-accent" />
           <span>מקלט ציבורי</span>
         </LegendItem>
