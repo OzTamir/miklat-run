@@ -81,7 +81,7 @@ export function Sidebar({ children }: SidebarProps) {
   return (
     <>
       {/* Desktop: fixed right panel */}
-      <aside className="hidden md:flex md:flex-col md:w-[340px] md:h-full md:border-l md:border-white/[0.04] md:bg-bg-surface">
+      <aside className="hidden md:fixed md:inset-y-0 md:right-0 md:z-30 md:flex md:w-[340px] md:flex-col md:border-l md:border-white/[0.04] md:bg-bg-surface">
         <div className="px-5 py-4">
           <SidebarHeader />
         </div>

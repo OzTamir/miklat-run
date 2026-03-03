@@ -23,6 +23,12 @@ export function useAddressSearch(): UseAddressSearchReturn {
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const setStartPoint = useRouteStore((s) => s.setStartPoint);
+  const startAddress = useRouteStore((s) => s.startAddress);
+
+  // Sync external address changes (e.g., from map click) to local query state
+  useEffect(() => {
+    setQueryState(startAddress);
+  }, [startAddress]);
 
   const setQuery = useCallback((value: string) => {
     setQueryState(value);
