@@ -1,7 +1,7 @@
 {
-  "name": "miklat-vite-1jdb9t",
+  "name": "miklat-run",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
