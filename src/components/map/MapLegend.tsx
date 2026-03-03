@@ -1,7 +1,8 @@
 export function MapLegend() {
   return (
     <div
-      className="fixed bottom-4 left-4 z-[1000] rounded-lg border border-white/10 bg-bg-surface/95 p-3 shadow-default backdrop-blur-sm max-md:p-2 max-md:text-xs"
+      dir="rtl"
+      className="fixed bottom-4 left-4 z-[1000] rounded-lg border border-white/10 bg-bg-surface/95 p-3 shadow-default backdrop-blur-sm max-md:p-2 max-md:text-xs text-start"
     >
       <div className="flex flex-col gap-1.5 text-sm max-md:gap-1 max-md:text-[11px]">
         <LegendItem>

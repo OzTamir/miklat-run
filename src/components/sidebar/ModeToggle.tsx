@@ -19,7 +19,7 @@ export function ModeToggle() {
             key={mode.value}
             type="button"
             onClick={() => setRouteMode(mode.value)}
-            className={`flex-1 rounded-md px-3 py-2 text-[13px] font-medium transition-all ${
+            className={`flex-1 rounded-md px-3 py-2 text-[13px] font-medium transition-all text-center ${
               isActive
                 ? 'bg-accent text-white shadow-sm'
                 : 'text-text-muted hover:text-text-secondary'

@@ -76,8 +76,8 @@ export function PaceMode() {
         />
 
         <div className="flex justify-between text-[12px] text-text-muted">
-          <span>{"\u05D3\u05E7' 90"}</span>
           <span>{"\u05D3\u05E7' 10"}</span>
+          <span>{"\u05D3\u05E7' 90"}</span>
         </div>
       </div>
 

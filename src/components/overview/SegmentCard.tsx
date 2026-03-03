@@ -11,7 +11,7 @@ export function SegmentCard({ segment, isActive, onClick }: SegmentCardProps) {
     <button
       type="button"
       onClick={onClick}
-      className={`flex w-full cursor-pointer flex-col gap-1 border-l-0 px-5 py-3 text-right transition-colors duration-150 hover:bg-white/[0.03] ${
+      className={`flex w-full cursor-pointer flex-col gap-1 border-l-0 px-5 py-3 text-start transition-colors duration-150 hover:bg-white/[0.03] ${
         isActive ? 'bg-accent-dim' : ''
       }`}
       style={{ borderRight: `3px solid ${segment.color}` }}

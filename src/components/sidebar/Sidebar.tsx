@@ -58,7 +58,7 @@ function SidebarHeader() {
           opacity="0.3"
         />
       </svg>
-      <div>
+      <div className="text-start">
         <h1 className="text-[20px] font-semibold tracking-tight text-text-primary">
           {'\u05DE\u05E1\u05DC\u05D5\u05DC \u05DE\u05D5\u05D2\u05DF'}
         </h1>
@@ -81,18 +81,18 @@ export function Sidebar({ children }: SidebarProps) {
   return (
     <>
       {/* Desktop: fixed right panel */}
-      <aside className="hidden md:fixed md:inset-y-0 md:right-0 md:z-30 md:flex md:w-[340px] md:flex-col md:border-l md:border-white/[0.04] md:bg-bg-surface">
+      <aside dir="rtl" className="hidden md:fixed md:inset-y-0 md:right-0 md:z-30 md:flex md:w-[340px] md:flex-col md:border-l md:border-white/[0.04] md:bg-bg-surface">
         <div className="px-5 py-4">
           <SidebarHeader />
         </div>
         <Separator className="bg-white/[0.04]" />
         <ScrollArea className="flex-1">
-          <div className="flex flex-col gap-0">
+          <div data-sidebar-content className="flex flex-col gap-0">
             <SidebarSection>
               <AddressSearch />
             </SidebarSection>
             <SidebarSection>
-              <div className="text-[13px] font-medium text-text-primary mb-3">
+              <div className="text-[13px] font-medium text-text-primary mb-3 text-start">
                 {'\u05EA\u05DB\u05E0\u05D5\u05DF \u05DE\u05E1\u05DC\u05D5\u05DC'}
               </div>
               <ModeToggle />
@@ -116,6 +116,7 @@ export function Sidebar({ children }: SidebarProps) {
 
       {/* Mobile: bottom sheet */}
       <aside
+        dir="rtl"
         className={`fixed inset-x-0 bottom-0 z-40 flex flex-col bg-bg-surface rounded-t-2xl shadow-[0_-8px_32px_rgba(0,0,0,0.4)] transition-transform duration-300 ease-out md:hidden ${
           sidebarExpanded
             ? 'translate-y-0'
@@ -133,12 +134,12 @@ export function Sidebar({ children }: SidebarProps) {
         </button>
         <Separator className="bg-white/[0.04]" />
         <ScrollArea className="flex-1 overflow-hidden">
-          <div className="flex flex-col gap-0">
+          <div data-sidebar-content className="flex flex-col gap-0">
             <SidebarSection>
               <AddressSearch />
             </SidebarSection>
             <SidebarSection>
-              <div className="text-[13px] font-medium text-text-primary mb-3">
+              <div className="text-[13px] font-medium text-text-primary mb-3 text-start">
                 {'\u05EA\u05DB\u05E0\u05D5\u05DF \u05DE\u05E1\u05DC\u05D5\u05DC'}
               </div>
               <ModeToggle />

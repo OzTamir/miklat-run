@@ -10,7 +10,7 @@ export function GenerateButton() {
     <Button
       onClick={generate}
       disabled={!canGenerate() || isGenerating}
-      className="h-11 w-full bg-accent text-[15px] font-semibold text-white shadow-[0_4px_16px_rgba(232,145,58,0.25)] transition-all hover:bg-accent-hover disabled:opacity-40 disabled:shadow-none"
+      className="h-11 w-full bg-accent text-[15px] font-semibold text-white shadow-[0_4px_16px_rgba(232,145,58,0.25)] transition-all hover:bg-accent-hover disabled:opacity-40 disabled:shadow-none flex-row-reverse gap-2"
     >
       {isGenerating ? (
         <svg
@@ -44,8 +44,10 @@ export function GenerateButton() {
             stroke="currentColor"
             strokeWidth="2.5"
             strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden
           >
-            <path d="M19 12H5M12 5l-7 7 7 7" />
+            <path d="M5 12h14M12 5l7 7-7 7" />
           </svg>
         </>
       )}

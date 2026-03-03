@@ -25,7 +25,7 @@ export function BiasToggle() {
               key={bias.value}
               type="button"
               onClick={() => setDistanceBias(bias.value)}
-              className={`flex-1 rounded-md px-3 py-1.5 text-[13px] font-medium transition-all ${
+              className={`flex-1 rounded-md px-3 py-1.5 text-[13px] font-medium transition-all text-center ${
                 isActive
                   ? 'bg-accent text-white shadow-sm'
                   : 'text-text-muted hover:text-text-secondary'
@@ -37,7 +37,7 @@ export function BiasToggle() {
         })}
       </div>
 
-      <p className="text-[12px] text-text-muted">{EXPLAINERS[distanceBias]}</p>
+      <p className="text-[12px] text-text-muted text-start">{EXPLAINERS[distanceBias]}</p>
     </div>
   );
 }

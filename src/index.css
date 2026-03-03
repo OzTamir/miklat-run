@@ -49,6 +49,12 @@
   }
 }
 
+/* Force RTL in sidebar and overview so content and flex order are correct */
+[data-sidebar-content],
+[data-overview-content] {
+  direction: rtl;
+}
+
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);

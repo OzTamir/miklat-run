@@ -30,7 +30,7 @@ export function AddressSearch() {
 
   return (
     <div className="space-y-1.5">
-      <div className="text-[13px] font-medium text-text-primary">
+      <div className="text-[13px] font-medium text-text-primary text-start">
         {'\u05E0\u05E7\u05D5\u05D3\u05EA \u05D4\u05EA\u05D7\u05DC\u05D4'}
       </div>
 
@@ -40,7 +40,8 @@ export function AddressSearch() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={'\u05D4\u05E7\u05DC\u05D3 \u05DB\u05EA\u05D5\u05D1\u05EA \u05D1\u05EA\u05DC \u05D0\u05D1\u05D9\u05D1...'}
-            className="h-10 bg-bg-surface-2 border-white/[0.06] pr-10 text-sm placeholder:text-text-muted"
+            dir="rtl"
+            className="h-10 bg-bg-surface-2 border-white/[0.06] pr-10 text-center text-sm placeholder:text-text-muted"
             autoComplete="off"
           />
           <div className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted">
@@ -94,7 +95,7 @@ export function AddressSearch() {
         )}
       </div>
 
-      <p className="text-[12px] text-text-muted">
+      <p className="text-[12px] text-text-muted text-start">
         {'\u05D0\u05D5 \u05DC\u05D7\u05E5 \u05E2\u05DC \u05D4\u05DE\u05E4\u05D4 \u05DC\u05D1\u05D7\u05D9\u05E8\u05EA \u05E0\u05E7\u05D5\u05D3\u05D4'}
       </p>
     </div>
