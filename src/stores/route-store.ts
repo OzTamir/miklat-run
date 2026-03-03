@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import type {
   LatLng,
   RouteMode,
@@ -8,6 +9,20 @@ import type {
   Shelter,
 } from '@/types';
 import { SHELTERS } from '@/data';
+
+const STORAGE_KEY = 'miklat-run-settings';
+
+/** Settings we persist to localStorage (subset of RouteState) */
+interface PersistedSettings {
+  startLatLng: LatLng | null;
+  startAddress: string;
+  routeMode: RouteMode;
+  targetDistanceKm: number;
+  distanceBias: DistanceBias;
+  paceMin: number;
+  paceSec: number;
+  timeMinutes: number;
+}
 
 interface RouteState {
   startLatLng: LatLng | null;
@@ -49,7 +64,9 @@ interface RouteState {
   canGenerate: () => boolean;
 }
 
-export const useRouteStore = create<RouteState>((set, get) => ({
+export const useRouteStore = create<RouteState>()(
+  persist(
+    (set, get) => ({
   startLatLng: null,
   startAddress: '',
 
@@ -119,4 +136,19 @@ export const useRouteStore = create<RouteState>((set, get) => ({
   },
 
   canGenerate: () => get().startLatLng !== null,
-}));
+}),
+    {
+      name: STORAGE_KEY,
+      partialize: (state): PersistedSettings => ({
+        startLatLng: state.startLatLng,
+        startAddress: state.startAddress,
+        routeMode: state.routeMode,
+        targetDistanceKm: state.targetDistanceKm,
+        distanceBias: state.distanceBias,
+        paceMin: state.paceMin,
+        paceSec: state.paceSec,
+        timeMinutes: state.timeMinutes,
+      }),
+    }
+  )
+);

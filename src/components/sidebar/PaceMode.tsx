@@ -32,7 +32,7 @@ export function PaceMode() {
         <div className="text-[12px] font-medium text-text-secondary">
           {"קצב (דק'/ק\"מ)"}
         </div>
-        <div className="flex items-center justify-center gap-1">
+        <div className="flex items-center justify-center gap-1 flex-row-reverse">
           <input
             type="number"
             min={3}
@@ -76,8 +76,8 @@ export function PaceMode() {
         />
 
         <div className="flex justify-between text-[12px] text-text-muted">
-          <span>{"דק' 10"}</span>
-          <span>{"דק' 90"}</span>
+          <span>{"10 דק'"}</span>
+          <span>{"90 דק'"}</span>
         </div>
       </div>
 

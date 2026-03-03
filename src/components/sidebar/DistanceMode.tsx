@@ -30,8 +30,8 @@ export function DistanceMode() {
       />
 
       <div className="flex justify-between text-[12px] text-text-muted">
-        <span>{'ק"מ 1'}</span>
-        <span>{'ק"מ 15'}</span>
+        <span>{'1 ק"מ'}</span>
+        <span>{'15 ק"מ'}</span>
       </div>
     </div>
   );
