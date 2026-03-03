@@ -1,6 +1,6 @@
 import type { LatLng, SafetyZone, SafetyPoint } from './geo';
 import type { Shelter } from './shelter';
-import type GeoJSON from 'geojson';
+import type { LineString } from 'geojson';
 
 export interface OSRMStep {
   distance: number;
@@ -11,11 +11,11 @@ export interface OSRMStep {
     bearing_before: number;
     bearing_after: number;
   };
-  geometry?: GeoJSON.LineString;
+  geometry?: LineString;
 }
 
 export interface RouteData {
-  geometry: GeoJSON.LineString;
+  geometry: LineString;
   distance: number;
   duration: number;
   waypoints: LatLng[];
