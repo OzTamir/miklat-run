@@ -36,6 +36,25 @@ function RouteConfirmDialogWrapper() {
   );
 }
 
+function OverviewOpenButton() {
+  const routeData = useRouteStore((s) => s.routeData);
+  const overviewVisible = useRouteStore((s) => s.overviewVisible);
+  const setOverviewVisible = useRouteStore((s) => s.setOverviewVisible);
+
+  if (!routeData || overviewVisible) return null;
+
+  return (
+    <button
+      type="button"
+      onClick={() => setOverviewVisible(true)}
+      title="סקירת המסלול"
+      className="absolute left-0 top-1/2 z-10 -translate-y-1/2 rounded-r-lg border border-l-0 border-white/[0.08] bg-bg-surface px-2 py-3 text-[12px] font-medium text-text-secondary shadow-lg transition-colors hover:bg-bg-surface-2 hover:text-text-primary"
+    >
+      {'סקירה'}
+    </button>
+  );
+}
+
 function App() {
   return (
     <div
@@ -46,6 +65,7 @@ function App() {
 
       <main className="absolute inset-0 z-0 md:right-[340px]">
         <MapView />
+        <OverviewOpenButton />
       </main>
 
       <Sidebar />

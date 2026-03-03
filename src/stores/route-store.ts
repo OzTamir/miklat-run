@@ -85,7 +85,12 @@ export const useRouteStore = create<RouteState>((set, get) => ({
   setTimeMinutes: (min) => set({ timeMinutes: min }),
 
   setRouteResult: (data, segments) =>
-    set({ routeData: data, computedSegments: segments, overviewVisible: true }),
+    set({
+      routeData: data,
+      computedSegments: segments,
+      overviewVisible: true,
+      highlightedSegmentIdx: null,
+    }),
 
   clearRoute: () =>
     set({

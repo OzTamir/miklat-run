@@ -6,6 +6,8 @@ export function RouteInfo() {
   const computedSegments = useRouteStore((s) => s.computedSegments);
   const paceMin = useRouteStore((s) => s.paceMin);
   const paceSec = useRouteStore((s) => s.paceSec);
+  const overviewVisible = useRouteStore((s) => s.overviewVisible);
+  const setOverviewVisible = useRouteStore((s) => s.setOverviewVisible);
 
   if (!routeData) return null;
 
@@ -24,6 +26,16 @@ export function RouteInfo() {
 
   return (
     <div className="space-y-3">
+      {!overviewVisible && (
+        <button
+          type="button"
+          onClick={() => setOverviewVisible(true)}
+          className="w-full rounded-lg border border-accent/40 bg-accent/10 px-3 py-2.5 text-[13px] font-medium text-accent transition-colors hover:bg-accent/20"
+        >
+          {'סקירת המסלול — הצג קטעים'}
+        </button>
+      )}
+
       <div className="text-[14px] font-semibold text-text-primary">
         {'פרטי המסלול'}
       </div>
