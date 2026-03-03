@@ -3,7 +3,6 @@ import { CircleMarker, Popup } from 'react-leaflet';
 import { useRouteStore } from '@/stores/route-store';
 import { buildGrid, haversine } from '@/lib/geo';
 import { ShelterPopup } from './ShelterMarkers';
-import type { Shelter } from '@/types';
 
 const ACTIVE_RANGE_M = 250;
 const GRID_SIZE = 0.003;
