@@ -43,6 +43,7 @@ interface RouteState {
   isLoading: boolean;
   loadingMessage: string;
   sidebarExpanded: boolean;
+  mobileDrawerSize: 'half' | 'full';
   overviewVisible: boolean;
 
   shelters: Shelter[];
@@ -85,6 +86,7 @@ export const useRouteStore = create<RouteState>()(
   isLoading: false,
   loadingMessage: '',
   sidebarExpanded: true,
+  mobileDrawerSize: 'half',
   overviewVisible: false,
 
   shelters: SHELTERS,
@@ -136,7 +138,15 @@ export const useRouteStore = create<RouteState>()(
     set({ isLoading: loading, loadingMessage: message ?? '' }),
 
   toggleSidebar: () =>
-    set((state) => ({ sidebarExpanded: !state.sidebarExpanded })),
+    set((state) => {
+      if (!state.sidebarExpanded) {
+        return { sidebarExpanded: true, mobileDrawerSize: 'half' };
+      }
+      if (state.mobileDrawerSize === 'half') {
+        return { mobileDrawerSize: 'full' };
+      }
+      return { sidebarExpanded: false, mobileDrawerSize: 'half' };
+    }),
 
   setOverviewVisible: (visible) => {
     set({ overviewVisible: visible });

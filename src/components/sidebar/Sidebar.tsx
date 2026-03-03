@@ -77,7 +77,14 @@ interface SidebarProps {
 
 export function Sidebar({ children }: SidebarProps) {
   const sidebarExpanded = useRouteStore((s) => s.sidebarExpanded);
+  const mobileDrawerSize = useRouteStore((s) => s.mobileDrawerSize);
   const toggleSidebar = useRouteStore((s) => s.toggleSidebar);
+  const routeData = useRouteStore((s) => s.routeData);
+
+  const mobileHeight =
+    mobileDrawerSize === 'full' ? '90dvh' : '48vh';
+
+  const showMobileConfig = !routeData;
 
   return (
     <>
@@ -116,26 +123,30 @@ export function Sidebar({ children }: SidebarProps) {
         <SidebarFooter />
       </aside>
 
-      {/* Mobile: bottom sheet */}
+      {/* Mobile: bottom sheet (hidden when a route is generated — overview is shown instead) */}
+      {showMobileConfig && (
       <aside
         dir="rtl"
-        className={`fixed inset-x-0 bottom-0 z-40 flex flex-col bg-bg-surface rounded-t-2xl shadow-[0_-8px_32px_rgba(0,0,0,0.4)] transition-transform duration-300 ease-out md:hidden ${
+        className={`fixed inset-x-0 bottom-0 z-40 flex flex-col bg-bg-surface rounded-t-2xl shadow-[0_-8px_32px_rgba(0,0,0,0.4)] transition-[transform,max-height] duration-300 ease-out md:hidden ${
           sidebarExpanded
             ? 'translate-y-0'
             : 'translate-y-[calc(100%-56px)]'
         }`}
-        style={{ maxHeight: '70vh' }}
+        style={{ maxHeight: sidebarExpanded ? mobileHeight : '56px' }}
+        onTouchStart={(e) => e.stopPropagation()}
       >
         <button
           type="button"
           onClick={toggleSidebar}
-          className="flex w-full cursor-pointer flex-col items-center px-5 py-3"
+          className="flex w-full shrink-0 cursor-pointer flex-col items-center px-5 py-3"
         >
           <div className="mb-3 h-1 w-9 rounded-full bg-white/20" />
           <SidebarHeader />
         </button>
-        <Separator className="bg-white/[0.04]" />
-        <ScrollArea className="flex-1 overflow-hidden">
+        <Separator className="shrink-0 bg-white/[0.04]" />
+        <div
+          className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch]"
+        >
           <div data-sidebar-content className="flex flex-col gap-0">
             <SidebarSection>
               <AddressSearch />
@@ -159,10 +170,11 @@ export function Sidebar({ children }: SidebarProps) {
               <HowItWorks />
             </SidebarSection>
             {children}
+            <SidebarFooter />
           </div>
-        </ScrollArea>
-        <SidebarFooter />
+        </div>
       </aside>
+      )}
     </>
   );
 }

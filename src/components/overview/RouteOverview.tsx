@@ -10,6 +10,7 @@ export function RouteOverview() {
   const highlightSegment = useRouteStore((s) => s.highlightSegment);
   const resetSegmentHighlight = useRouteStore((s) => s.resetSegmentHighlight);
   const setOverviewVisible = useRouteStore((s) => s.setOverviewVisible);
+  const clearRoute = useRouteStore((s) => s.clearRoute);
   const routeData = useRouteStore((s) => s.routeData);
   const paceMin = useRouteStore((s) => s.paceMin);
   const paceSec = useRouteStore((s) => s.paceSec);
@@ -23,6 +24,12 @@ export function RouteOverview() {
     : { safePercent: 0 };
 
   function handleClose() {
+    setOverviewVisible(false);
+    resetSegmentHighlight();
+  }
+
+  function handleStartOver() {
+    clearRoute();
     setOverviewVisible(false);
     resetSegmentHighlight();
   }
@@ -58,16 +65,17 @@ export function RouteOverview() {
         </ScrollArea>
       </div>
 
-      {/* Mobile: bottom sheet */}
+      {/* Mobile: bottom sheet (only drawer when route exists) — half screen, scrollable */}
       <div
         dir="rtl"
-        className={`fixed inset-x-0 bottom-0 z-30 flex max-h-[65vh] flex-col rounded-t-2xl border-t border-white/[0.08] bg-bg-surface transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] md:hidden ${
+        className={`fixed inset-x-0 bottom-0 z-40 flex h-[50vh] max-h-[50vh] flex-col rounded-t-2xl border-t border-white/[0.08] bg-bg-surface transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] md:hidden ${
           overviewVisible
             ? 'translate-y-0'
             : 'translate-y-full'
         }`}
+        onTouchStart={(e) => e.stopPropagation()}
       >
-        <div className="flex w-full flex-col items-center pt-2">
+        <div className="flex w-full shrink-0 flex-col items-center pt-2">
           <div className="mb-2 h-1 w-9 rounded-full bg-white/20" />
         </div>
         <OverviewHeader
@@ -76,7 +84,9 @@ export function RouteOverview() {
           safePercent={safePercent}
           onClose={handleClose}
         />
-        <ScrollArea className="flex-1 overflow-hidden">
+        <div
+          className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch]"
+        >
           <div data-overview-content className="py-2">
             {computedSegments.map((seg) => (
               <SegmentCard
@@ -87,7 +97,16 @@ export function RouteOverview() {
               />
             ))}
           </div>
-        </ScrollArea>
+        </div>
+        <div className="shrink-0 border-t border-white/[0.06] px-5 py-4">
+          <button
+            type="button"
+            onClick={handleStartOver}
+            className="w-full rounded-lg bg-accent py-3 text-[15px] font-semibold text-white transition-colors hover:opacity-90"
+          >
+            {'התחל מחדש'}
+          </button>
+        </div>
       </div>
     </>
   );
