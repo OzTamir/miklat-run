@@ -26,7 +26,14 @@ export function RouteConfirmDialog({
   isRetry,
   onAction,
 }: RouteConfirmDialogProps) {
-  const diff = (bestKm - targetKm).toFixed(1);
+  const bestKmRounded = Math.floor(bestKm * 10) / 10;
+  const bestKmDisplay =
+    bestKmRounded % 1 === 0
+      ? String(Math.round(bestKmRounded))
+      : bestKmRounded.toFixed(1);
+  const diffValue = Math.floor((bestKm - targetKm) * 10) / 10;
+  const diff =
+    diffValue % 1 === 0 ? String(Math.round(diffValue)) : diffValue.toFixed(1);
   const diffSign = bestKm >= targetKm ? '+' : '';
 
   return (
@@ -54,7 +61,7 @@ export function RouteConfirmDialog({
             </strong>
             {', \u05D4\u05DE\u05E1\u05DC\u05D5\u05DC \u05D4\u05D8\u05D5\u05D1 \u05D1\u05D9\u05D5\u05EA\u05E8 \u05E9\u05E0\u05DE\u05E6\u05D0 \u05D4\u05D5\u05D0 '}
             <strong>
-              {bestKm} {'\u05E7"\u05DE'}
+              {bestKmDisplay} {'\u05E7"\u05DE'}
             </strong>
             {` (${diffSign}${diff} ${'\u05E7"\u05DE'})`}
             <br />
