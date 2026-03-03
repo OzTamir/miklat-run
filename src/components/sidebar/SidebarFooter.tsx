@@ -19,7 +19,7 @@ function BuyMeACoffee() {
 
 export function SidebarFooter() {
   return (
-    <div className="flex flex-col items-center gap-3 px-5 py-4 border-t border-white/[0.04]">
+    <div className="flex shrink-0 flex-col items-center gap-3 border-t border-white/[0.04] px-5 py-4 mb-4">
       <div className="flex items-center gap-3">
         <a
           href="https://oztamir.com"
@@ -43,6 +43,11 @@ export function SidebarFooter() {
         </a>
       </div>
       <BuyMeACoffee />
+      <div className="flex items-center gap-3">
+        <a href="mailto:help@miklat.run" className="text-[12px] text-text-secondary hover:text-text-primary transition-colors text-center underline">
+          {'בעיות? תקלות? הצעות? שלחו לי מייל!'}
+        </a>
+      </div>
     </div>
   );
 }
