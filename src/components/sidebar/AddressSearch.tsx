@@ -41,7 +41,7 @@ export function AddressSearch() {
             onChange={(e) => setQuery(e.target.value)}
             placeholder={'הקלד כתובת בתל אביב...'}
             dir="rtl"
-            className="h-10 bg-bg-surface-2 border-white/[0.06] pr-10 text-center text-sm placeholder:text-text-muted"
+            className="h-10 bg-bg-surface-2 border-white/[0.06] pr-10 text-center text-base placeholder:text-text-muted md:text-sm"
             autoComplete="off"
           />
           <div className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted">
