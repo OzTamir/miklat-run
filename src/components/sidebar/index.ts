@@ -3,7 +3,6 @@ export { AddressSearch } from './AddressSearch';
 export { ModeToggle } from './ModeToggle';
 export { DistanceMode } from './DistanceMode';
 export { PaceMode } from './PaceMode';
-export { BiasToggle } from './BiasToggle';
 export { GenerateButton } from './GenerateButton';
 export { RouteInfo } from './RouteInfo';
 export { HowItWorks } from './HowItWorks';

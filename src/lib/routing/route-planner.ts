@@ -1,5 +1,10 @@
 import type { LatLng, Shelter } from '@/types';
-import { haversine } from '@/lib/geo';
+import { calcBearing, haversine } from '@/lib/geo';
+import {
+  ROUTING_SHARED_CONSTS,
+  ROUTE_PLANNER_ATTEMPT_CONFIGS,
+  ROUTE_PLANNER_CONSTS,
+} from './consts';
 
 interface IndexedShelter extends Shelter {
   idx: number;
@@ -13,24 +18,61 @@ interface LoopResult {
   estDist: number;
 }
 
-export function planRouteWaypoints(start: LatLng, targetDistM: number, shelters: Shelter[]): LatLng[] {
-  const MAX_EDGE = targetDistM < 5000 ? 800 : 450;
+function normalizeBearingDelta(delta: number): number {
+  const wrapped = ((delta % ROUTING_SHARED_CONSTS.degreesInCircle) + ROUTING_SHARED_CONSTS.degreesInCircle)
+    % ROUTING_SHARED_CONSTS.degreesInCircle;
+  return wrapped > ROUTING_SHARED_CONSTS.halfCircleDegrees
+    ? ROUTING_SHARED_CONSTS.degreesInCircle - wrapped
+    : wrapped;
+}
 
-  const allShelters: IndexedShelter[] = shelters.map((s, i) => ({
+export function planRouteWaypoints(start: LatLng, targetDistM: number, shelters: Shelter[]): LatLng[] {
+  const maxEdge = Math.max(
+    ROUTE_PLANNER_CONSTS.maxEdgeMinM,
+    Math.min(
+      ROUTE_PLANNER_CONSTS.maxEdgeMaxM,
+      targetDistM / ROUTE_PLANNER_CONSTS.maxEdgeTargetDivisorM,
+    ),
+  );
+
+  const indexedShelters: IndexedShelter[] = shelters.map((s, i) => ({
     ...s,
     idx: i,
     distToStart: haversine(start.lat, start.lng, s.lat, s.lng),
   }));
 
-  const loopRadius = targetDistM / (2 * Math.PI * 1.4);
-  const numPoints = Math.max(4, Math.min(16, Math.round(targetDistM / 500)));
+  const loopRadius = targetDistM / (2 * Math.PI * ROUTE_PLANNER_CONSTS.loopStreetDetourFactor);
+  const numPoints = Math.max(
+    ROUTE_PLANNER_CONSTS.loopPointsMin,
+    Math.min(
+      ROUTE_PLANNER_CONSTS.loopPointsMax,
+      Math.round(targetDistM / ROUTE_PLANNER_CONSTS.loopPointDistanceDivisorM),
+    ),
+  );
+  const searchRadius = Math.max(
+    ROUTE_PLANNER_CONSTS.shelterSearchRadiusMinM,
+    loopRadius * ROUTE_PLANNER_CONSTS.shelterSearchRadiusLoopMultiplier,
+  );
+
+  const allShelters = indexedShelters
+    .filter((s) => s.distToStart <= searchRadius)
+    .sort((a, b) => a.distToStart - b.distToStart)
+    .slice(0, ROUTE_PLANNER_CONSTS.shelterCandidateLimit);
 
   let bestRoute: LoopResult | null = null;
   let bestScore = -1;
 
-  for (let attempt = 0; attempt < 10; attempt++) {
-    const angle = (attempt / 10) * Math.PI * 2 + Math.random() * 0.3;
-    const route = tryBuildLoop(start, allShelters, loopRadius, numPoints, angle, MAX_EDGE, targetDistM);
+  for (const attempt of ROUTE_PLANNER_ATTEMPT_CONFIGS) {
+    const route = tryBuildLoop(
+      start,
+      allShelters,
+      loopRadius,
+      numPoints,
+      attempt.angleRad,
+      maxEdge,
+      targetDistM,
+      attempt.ellipseRatio,
+    );
 
     if (route && route.score > bestScore) {
       bestScore = route.score;
@@ -39,8 +81,8 @@ export function planRouteWaypoints(start: LatLng, targetDistM: number, shelters:
   }
 
   if (!bestRoute || bestRoute.waypoints.length < 3) {
-    const nearby = allShelters
-      .filter((s) => s.distToStart <= 2000)
+    const nearby = indexedShelters
+      .filter((s) => s.distToStart <= ROUTE_PLANNER_CONSTS.fallbackNearbyRadiusM)
       .sort((a, b) => a.distToStart - b.distToStart);
 
     if (nearby.length < 2) {
@@ -49,13 +91,18 @@ export function planRouteWaypoints(start: LatLng, targetDistM: number, shelters:
 
     const wp: LatLng[] = [{ lat: start.lat, lng: start.lng }];
     let dist = 0;
+    let prev = start;
 
     for (const s of nearby) {
-      wp.push({ lat: s.lat, lng: s.lng });
-      dist += s.distToStart;
-      if (dist >= targetDistM * 0.4) {
+      const stepDist = haversine(prev.lat, prev.lng, s.lat, s.lng);
+      const distBack = haversine(s.lat, s.lng, start.lat, start.lng);
+      if (dist + stepDist + distBack > targetDistM * ROUTE_PLANNER_CONSTS.fallbackTargetShare) {
         break;
       }
+
+      wp.push({ lat: s.lat, lng: s.lng });
+      dist += stepDist;
+      prev = s;
     }
 
     wp.push({ lat: start.lat, lng: start.lng });
@@ -73,12 +120,16 @@ export function tryBuildLoop(
   angle: number,
   maxEdge: number,
   targetDistM: number,
+  ellipseRatio: number,
 ): LoopResult | null {
-  const DEG_PER_M_LAT = 1 / 111320;
-  const DEG_PER_M_LNG = 1 / (111320 * Math.cos(start.lat * Math.PI / 180));
+  const DEG_PER_M_LAT = 1 / ROUTE_PLANNER_CONSTS.metersPerDegree;
+  const DEG_PER_M_LNG = 1 / (
+    ROUTE_PLANNER_CONSTS.metersPerDegree
+    * Math.cos(start.lat * Math.PI / ROUTING_SHARED_CONSTS.halfCircleDegrees)
+  );
 
   const rxM = radius;
-  const ryM = radius * (0.6 + Math.random() * 0.6);
+  const ryM = radius * ellipseRatio;
 
   const idealPoints: LatLng[] = [];
   for (let i = 0; i < numPoints; i++) {
@@ -98,41 +149,82 @@ export function tryBuildLoop(
   let totalStraightDist = 0;
   let prevPos = start;
   let shelterCount = 0;
+  let segmentCount = 0;
+  let bridgeCount = 0;
+  let cumulativeBearingDelta = 0;
+  let prevSegmentBearing: number | null = null;
+
+  const appendWaypoint = (point: LatLng): void => {
+    const legDist = haversine(prevPos.lat, prevPos.lng, point.lat, point.lng);
+    if (legDist < ROUTE_PLANNER_CONSTS.appendWaypointMinLegM) {
+      prevPos = point;
+      return;
+    }
+
+    waypoints.push({ lat: point.lat, lng: point.lng });
+    totalStraightDist += legDist;
+    const bearing = calcBearing(prevPos.lat, prevPos.lng, point.lat, point.lng);
+    if (prevSegmentBearing !== null) {
+      cumulativeBearingDelta += normalizeBearingDelta(bearing - prevSegmentBearing);
+    }
+    prevSegmentBearing = bearing;
+    prevPos = point;
+    segmentCount++;
+  };
 
   for (const ideal of idealPoints) {
     let best: IndexedShelter | null = null;
-    let bestDist = Infinity;
+    let bestScore = Infinity;
+    let bestIdealDist = Infinity;
+    const idealBearing = calcBearing(prevPos.lat, prevPos.lng, ideal.lat, ideal.lng);
 
     for (const s of allShelters) {
       if (usedShelters.has(s.idx)) {
         continue;
       }
 
-      const d = haversine(ideal.lat, ideal.lng, s.lat, s.lng);
       const dFromPrev = haversine(prevPos.lat, prevPos.lng, s.lat, s.lng);
-      if (d < bestDist && dFromPrev < maxEdge * 3) {
-        bestDist = d;
+      if (dFromPrev > maxEdge * ROUTE_PLANNER_CONSTS.candidateFromPreviousMaxEdgeMultiplier) {
+        continue;
+      }
+
+      const idealDist = haversine(ideal.lat, ideal.lng, s.lat, s.lng);
+      const candidateBearing = calcBearing(prevPos.lat, prevPos.lng, s.lat, s.lng);
+      const headingDelta = normalizeBearingDelta(candidateBearing - idealBearing);
+      const edgeTargetPenalty = Math.abs(dFromPrev - maxEdge * ROUTE_PLANNER_CONSTS.edgeTargetRatio)
+        * ROUTE_PLANNER_CONSTS.edgeTargetPenaltyWeight;
+      const shortHopPenalty = dFromPrev < maxEdge * ROUTE_PLANNER_CONSTS.shortHopRatio
+        ? (maxEdge * ROUTE_PLANNER_CONSTS.shortHopRatio - dFromPrev) * ROUTE_PLANNER_CONSTS.shortHopPenaltyWeight
+        : 0;
+      const headingPenalty = headingDelta * ROUTE_PLANNER_CONSTS.headingPenaltyWeight;
+      const candidateScore = idealDist
+        + dFromPrev * ROUTE_PLANNER_CONSTS.candidateDistanceWeight
+        + edgeTargetPenalty
+        + shortHopPenalty
+        + headingPenalty;
+
+      if (candidateScore < bestScore) {
+        bestScore = candidateScore;
+        bestIdealDist = idealDist;
         best = s;
       }
     }
 
-    if (best && bestDist < radius * 0.8) {
+    if (best && bestIdealDist < radius * ROUTE_PLANNER_CONSTS.idealPointAcceptanceRadiusRatio) {
       const gap = haversine(prevPos.lat, prevPos.lng, best.lat, best.lng);
 
       if (gap > maxEdge) {
-        const bridged = bridgeShelters(prevPos, best, allShelters, usedShelters, maxEdge);
+        const bridgeBearing = calcBearing(prevPos.lat, prevPos.lng, best.lat, best.lng);
+        const bridged = bridgeShelters(prevPos, best, allShelters, usedShelters, maxEdge, bridgeBearing);
         for (const bs of bridged) {
-          waypoints.push({ lat: bs.lat, lng: bs.lng });
-          totalStraightDist += haversine(prevPos.lat, prevPos.lng, bs.lat, bs.lng);
-          prevPos = bs;
+          appendWaypoint({ lat: bs.lat, lng: bs.lng });
           usedShelters.add(bs.idx);
           shelterCount++;
+          bridgeCount++;
         }
       }
 
-      waypoints.push({ lat: best.lat, lng: best.lng });
-      totalStraightDist += haversine(prevPos.lat, prevPos.lng, best.lat, best.lng);
-      prevPos = best;
+      appendWaypoint({ lat: best.lat, lng: best.lng });
       usedShelters.add(best.idx);
       shelterCount++;
     }
@@ -140,17 +232,31 @@ export function tryBuildLoop(
 
   const distBack = haversine(prevPos.lat, prevPos.lng, start.lat, start.lng);
   if (distBack > maxEdge) {
-    const bridged = bridgeShelters(prevPos, start, allShelters, usedShelters, maxEdge);
+    const bridgeBearing = calcBearing(prevPos.lat, prevPos.lng, start.lat, start.lng);
+    const bridged = bridgeShelters(prevPos, start, allShelters, usedShelters, maxEdge, bridgeBearing);
     for (const bs of bridged) {
-      waypoints.push({ lat: bs.lat, lng: bs.lng });
+      appendWaypoint({ lat: bs.lat, lng: bs.lng });
       usedShelters.add(bs.idx);
+      shelterCount++;
+      bridgeCount++;
     }
   }
-  waypoints.push({ lat: start.lat, lng: start.lng });
+  appendWaypoint({ lat: start.lat, lng: start.lng });
 
-  const estRouteDist = totalStraightDist * 1.4;
+  const estRouteDist = totalStraightDist * ROUTE_PLANNER_CONSTS.estimatedStreetDistanceMultiplier;
   const distRatio = Math.min(estRouteDist, targetDistM) / Math.max(estRouteDist, targetDistM);
-  const score = shelterCount * 0.15 + distRatio * 0.85;
+  const shelterScore = Math.min(1, shelterCount / Math.max(1, numPoints));
+  const avgBearingDelta = segmentCount > 1 ? cumulativeBearingDelta / (segmentCount - 1) : 0;
+  const headingSmoothness = 1 - Math.min(1, avgBearingDelta / ROUTE_PLANNER_CONSTS.headingSmoothnessDenominatorDeg);
+  const bridgePenalty = Math.min(
+    1,
+    bridgeCount / Math.max(ROUTE_PLANNER_CONSTS.bridgePenaltyMinDivisor, numPoints / 2),
+  );
+  const smoothnessScore = headingSmoothness * ROUTE_PLANNER_CONSTS.smoothnessHeadingWeight
+    + (1 - bridgePenalty) * ROUTE_PLANNER_CONSTS.smoothnessBridgeWeight;
+  const score = distRatio * ROUTE_PLANNER_CONSTS.scoreDistanceWeight
+    + shelterScore * ROUTE_PLANNER_CONSTS.scoreShelterWeight
+    + smoothnessScore * ROUTE_PLANNER_CONSTS.scoreSmoothnessWeight;
 
   return { waypoints, score, shelterCount, estDist: estRouteDist };
 }
@@ -161,11 +267,12 @@ export function bridgeShelters(
   allShelters: IndexedShelter[],
   usedShelters: Set<number>,
   maxEdge: number,
+  preferredBearing?: number,
 ): IndexedShelter[] {
   const result: IndexedShelter[] = [];
   let current = from;
   const targetDist = haversine(from.lat, from.lng, to.lat, to.lng);
-  const maxSteps = Math.min(5, Math.ceil(targetDist / maxEdge));
+  const maxSteps = Math.min(ROUTE_PLANNER_CONSTS.bridgeMaxSteps, Math.ceil(targetDist / maxEdge));
 
   for (let step = 0; step < maxSteps; step++) {
     const distToTarget = haversine(current.lat, current.lng, to.lat, to.lng);
@@ -184,16 +291,22 @@ export function bridgeShelters(
       const dFromCurr = haversine(current.lat, current.lng, s.lat, s.lng);
       const dToTarget = haversine(s.lat, s.lng, to.lat, to.lng);
 
-      if (dFromCurr <= maxEdge && dFromCurr > 30) {
+      if (dFromCurr <= maxEdge && dFromCurr > ROUTE_PLANNER_CONSTS.bridgeMinStepDistanceM) {
         const progress = distToTarget - dToTarget;
-        if (progress > 0) {
-          bestScore = progress;
-          best = s;
+        if (progress > maxEdge * ROUTE_PLANNER_CONSTS.bridgeProgressMinRatio) {
+          const detour = dFromCurr + dToTarget - distToTarget;
+          const stepBearing = calcBearing(current.lat, current.lng, s.lat, s.lng);
+          const headingPenalty = preferredBearing === undefined
+            ? 0
+            : normalizeBearingDelta(stepBearing - preferredBearing) * ROUTE_PLANNER_CONSTS.bridgeHeadingPenaltyWeight;
+          const score = progress - detour * ROUTE_PLANNER_CONSTS.bridgeDetourPenaltyWeight - headingPenalty;
+          if (score > bestScore) {
+            bestScore = score;
+            best = s;
+          }
         }
       }
     }
-
-    void bestScore;
 
     if (!best) {
       break;

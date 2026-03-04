@@ -7,7 +7,6 @@ import { AddressSearch } from './AddressSearch';
 import { ModeToggle } from './ModeToggle';
 import { DistanceMode } from './DistanceMode';
 import { PaceMode } from './PaceMode';
-import { BiasToggle } from './BiasToggle';
 import { GenerateButton } from './GenerateButton';
 import { RouteInfo } from './RouteInfo';
 import { HowItWorks } from './HowItWorks';
@@ -91,7 +90,6 @@ function DrawerSections({ children, includeFooter }: { children?: ReactNode; inc
         <ModeToggle />
         <DistanceMode />
         <PaceMode />
-        <BiasToggle />
       </SidebarSection>
       <SidebarSection>
         <GenerateButton />

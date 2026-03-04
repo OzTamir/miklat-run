@@ -5,7 +5,6 @@ export type {
   OSRMStep,
   RouteSegment,
   RouteCandidate,
-  DistanceBias,
   RouteMode,
 } from './route';
 export type { NominatimSearchResult, NominatimReverseResult } from './nominatim';

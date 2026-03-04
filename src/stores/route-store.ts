@@ -4,7 +4,6 @@ import { trackEvent } from '@/lib/analytics';
 import type {
   LatLng,
   RouteMode,
-  DistanceBias,
   RouteData,
   RouteSegment,
   Shelter,
@@ -19,7 +18,6 @@ interface PersistedSettings {
   startAddress: string;
   routeMode: RouteMode;
   targetDistanceKm: number;
-  distanceBias: DistanceBias;
   paceMin: number;
   paceSec: number;
   timeMinutes: number;
@@ -31,7 +29,6 @@ interface RouteState {
 
   routeMode: RouteMode;
   targetDistanceKm: number;
-  distanceBias: DistanceBias;
   paceMin: number;
   paceSec: number;
   timeMinutes: number;
@@ -51,7 +48,6 @@ interface RouteState {
   setStartPoint: (latlng: LatLng, address?: string) => void;
   setRouteMode: (mode: RouteMode) => void;
   setTargetDistance: (km: number) => void;
-  setDistanceBias: (bias: DistanceBias) => void;
   setPace: (min: number, sec: number) => void;
   setTimeMinutes: (min: number) => void;
   setRouteResult: (data: RouteData, segments: RouteSegment[]) => void;
@@ -75,7 +71,6 @@ export const useRouteStore = create<RouteState>()(
 
   routeMode: 'distance',
   targetDistanceKm: 5,
-  distanceBias: 'over',
   paceMin: 6,
   paceSec: 0,
   timeMinutes: 30,
@@ -103,8 +98,6 @@ export const useRouteStore = create<RouteState>()(
   },
 
   setTargetDistance: (km) => set({ targetDistanceKm: km }),
-
-  setDistanceBias: (bias) => set({ distanceBias: bias }),
 
   setPace: (min, sec) => set({ paceMin: min, paceSec: sec }),
 
@@ -172,7 +165,6 @@ export const useRouteStore = create<RouteState>()(
         startAddress: state.startAddress,
         routeMode: state.routeMode,
         targetDistanceKm: state.targetDistanceKm,
-        distanceBias: state.distanceBias,
         paceMin: state.paceMin,
         paceSec: state.paceSec,
         timeMinutes: state.timeMinutes,

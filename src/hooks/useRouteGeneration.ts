@@ -43,7 +43,6 @@ export function useRouteGeneration(): UseRouteGenerationReturn {
   const startLatLng = useRouteStore((s) => s.startLatLng);
   const routeMode = useRouteStore((s) => s.routeMode);
   const targetDistanceKm = useRouteStore((s) => s.targetDistanceKm);
-  const distanceBias = useRouteStore((s) => s.distanceBias);
   const shelters = useRouteStore((s) => s.shelters);
   const computedDistanceKm = useRouteStore((s) => s.computedDistanceKm);
   const setLoading = useRouteStore((s) => s.setLoading);
@@ -79,7 +78,6 @@ export function useRouteGeneration(): UseRouteGenerationReturn {
       const result = await generateRoute({
         start: startLatLng,
         targetDistKm: targetKm,
-        bias: distanceBias,
         isRetry: isRetryAttempt,
         shelters,
         onProgress: (msg) => setLoading(true, msg),
@@ -113,7 +111,6 @@ export function useRouteGeneration(): UseRouteGenerationReturn {
     routeMode,
     targetDistanceKm,
     computedDistanceKm,
-    distanceBias,
     shelters,
     setLoading,
     applyRoute,

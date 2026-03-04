@@ -44,8 +44,10 @@ export interface RouteCandidate {
   actualDist: number;
   distError: number;
   sf: number;
+  turnCount?: number;
+  turnDensity?: number;
+  longestContinueM?: number;
+  qualityScore?: number;
 }
-
-export type DistanceBias = 'over' | 'under';
 
 export type RouteMode = 'distance' | 'pace';

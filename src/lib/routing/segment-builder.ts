@@ -1,17 +1,23 @@
 import type { Shelter, SafetyPoint, SafetyZone, RouteSegment, OSRMStep } from '@/types';
-import { haversine, nearestShelter, calcBearing, bearingToHebrew } from '@/lib/geo';
+import {
+  haversine,
+  nearestShelter,
+  calcBearing,
+  bearingToHebrew,
+  buildGrid,
+  nearestShelterDist,
+} from '@/lib/geo';
+import {
+  SAFETY_THRESHOLDS_M,
+  SAFETY_ZONE_COLORS,
+  SEGMENT_BUILDER_CONSTS,
+} from './consts';
 
 interface MergedStep {
   name: string;
   distance: number;
   bearing: number;
 }
-
-const ZONE_COLORS: Record<SafetyZone, string> = {
-  green: '#3aba6f',
-  yellow: '#e8c93a',
-  red: '#e85a3a',
-};
 
 /**
  * Build logical route segments from raw coordinates and OSRM steps.
@@ -24,30 +30,33 @@ export function buildLogicalSegments(
   totalDist: number,
   shelters: Shelter[],
 ): RouteSegment[] {
+  const shelterGrid = shelters.length > 0 ? buildGrid(shelters) : null;
+
   // 1. Compute safety for ALL coordinates (no sampling)
   const allSafety: SafetyPoint[] = [];
   for (let i = 0; i < coords.length; i++) {
     const [lng, lat] = coords[i];
-    let minDist = Infinity;
-    for (const s of shelters) {
-      const d = haversine(lat, lng, s.lat, s.lng);
-      if (d < minDist) minDist = d;
-      if (d < 50) break;
+    let minDist = shelterGrid ? nearestShelterDist(lat, lng, shelterGrid) : Infinity;
+
+    // Fallback when the nearby grid cells are empty.
+    if (!Number.isFinite(minDist)) {
+      for (const s of shelters) {
+        const d = haversine(lat, lng, s.lat, s.lng);
+        if (d < minDist) minDist = d;
+        if (d < SAFETY_THRESHOLDS_M.veryCloseBreak) break;
+      }
     }
 
     let zone: SafetyZone;
-    let color: string;
-    if (minDist <= 150) {
+    if (minDist <= SAFETY_THRESHOLDS_M.greenMax) {
       zone = 'green';
-      color = '#3aba6f';
-    } else if (minDist <= 250) {
+    } else if (minDist <= SAFETY_THRESHOLDS_M.yellowMax) {
       zone = 'yellow';
-      color = '#e8c93a';
     } else {
       zone = 'red';
-      color = '#e85a3a';
     }
 
+    const color = SAFETY_ZONE_COLORS[zone];
     allSafety.push({ lat, lng, minDist, zone, color });
   }
 
@@ -65,7 +74,7 @@ export function buildLogicalSegments(
       {
         index: 0,
         zone: 'green',
-        color: '#3aba6f',
+        color: SAFETY_ZONE_COLORS.green,
         startCoord: allSafety[0],
         endCoord: allSafety[allSafety.length - 1],
         midCoord: midPt,
@@ -82,8 +91,14 @@ export function buildLogicalSegments(
   }
 
   // 4. Merge small steps into logical segments
-  const targetSegs = Math.max(6, Math.min(12, Math.round(totalDist / 800)));
-  const minSegDist = totalDist / (targetSegs * 1.5);
+  const targetSegs = Math.max(
+    SEGMENT_BUILDER_CONSTS.targetSegmentsMin,
+    Math.min(
+      SEGMENT_BUILDER_CONSTS.targetSegmentsMax,
+      Math.round(totalDist / SEGMENT_BUILDER_CONSTS.targetSegmentDistanceDivisorM),
+    ),
+  );
+  const minSegDist = totalDist / (targetSegs * SEGMENT_BUILDER_CONSTS.minSegmentDistanceSlackFactor);
   const mergedSteps: MergedStep[] = [];
   let accumDist = 0;
   let accumSteps: OSRMStep[] = [];
@@ -126,7 +141,7 @@ export function buildLogicalSegments(
         const d = haversine(lat1, lng1, lat2, lng2);
         segDist += d;
         coordIdx++;
-        if (segDist >= ms.distance * 0.95) break;
+        if (segDist >= ms.distance * SEGMENT_BUILDER_CONSTS.stepToGeometryCoverageRatio) break;
       }
     }
 
@@ -169,7 +184,7 @@ export function buildLogicalSegments(
     segments.push({
       index: si,
       zone: dominantZone,
-      color: ZONE_COLORS[dominantZone],
+      color: SAFETY_ZONE_COLORS[dominantZone],
       startCoord: { lat: startPt.lat, lng: startPt.lng },
       endCoord: { lat: endPt.lat, lng: endPt.lng },
       midCoord: { lat: midPt.lat, lng: midPt.lng },
