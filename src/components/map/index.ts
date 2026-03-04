@@ -1,6 +1,7 @@
 export { MapView } from './MapView';
 export { MapController } from './MapController';
 export { MapClickHandler } from './MapClickHandler';
+export { ShelterSync } from './ShelterSync';
 export { StartMarker } from './StartMarker';
 export { ShelterMarkers } from './ShelterMarkers';
 export { ActiveShelterMarkers } from './ActiveShelterMarkers';

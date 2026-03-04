@@ -43,12 +43,28 @@ export function AddressSearch() {
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder={'הקלד כתובת בתל אביב...'}
+            placeholder={'הקלד כתובת...'}
             dir="rtl"
             disabled={isStartPointLocked}
-            className="h-10 bg-bg-surface-2 border-white/[0.06] pr-10 text-center text-base placeholder:text-text-muted md:text-sm"
+            className="h-10 bg-bg-surface-2 border-white/[0.06] pr-10 pl-10 text-center text-base placeholder:text-text-muted md:text-sm"
             autoComplete="off"
           />
+          {!isStartPointLocked && query.trim().length > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                setQuery('');
+                clearResults();
+              }}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted transition-colors hover:text-text-primary"
+              aria-label="נקה כתובת"
+              title="נקה כתובת"
+            >
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M12.78 4.28a.75.75 0 0 0-1.06-1.06L8 6.94 4.28 3.22a.75.75 0 1 0-1.06 1.06L6.94 8l-3.72 3.72a.75.75 0 1 0 1.06 1.06L8 9.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L9.06 8l3.72-3.72z" />
+              </svg>
+            </button>
+          )}
           <div className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted">
             {isSearching ? (
               <svg
