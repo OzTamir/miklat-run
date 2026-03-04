@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { useRouteStore } from '@/stores/route-store';
 import { Slider } from '@/components/ui/slider';
 
@@ -9,22 +10,38 @@ export function PaceMode() {
   const setPace = useRouteStore((s) => s.setPace);
   const setTimeMinutes = useRouteStore((s) => s.setTimeMinutes);
   const computedDistanceKm = useRouteStore((s) => s.computedDistanceKm);
+  const [paceMinDraft, setPaceMinDraft] = useState(paceMin.toString());
+  const [paceSecDraft, setPaceSecDraft] = useState(
+    paceSec.toString().padStart(2, '0')
+  );
 
-  if (routeMode !== 'pace') return null;
+  useEffect(() => {
+    setPaceMinDraft(paceMin.toString());
+  }, [paceMin]);
 
-  const handleMinChange = (value: string) => {
+  useEffect(() => {
+    setPaceSecDraft(paceSec.toString().padStart(2, '0'));
+  }, [paceSec]);
+
+  const commitMin = (value: string) => {
     const n = parseInt(value, 10);
     if (!isNaN(n) && n >= 3 && n <= 12) {
       setPace(n, paceSec);
+      return true;
     }
+    return false;
   };
 
-  const handleSecChange = (value: string) => {
+  const commitSec = (value: string) => {
     const n = parseInt(value, 10);
     if (!isNaN(n) && n >= 0 && n <= 59) {
       setPace(paceMin, n);
+      return true;
     }
+    return false;
   };
+
+  if (routeMode !== 'pace') return null;
 
   return (
     <div className="mt-4 space-y-4">
@@ -34,21 +51,51 @@ export function PaceMode() {
         </div>
         <div className="flex items-center justify-center gap-1 flex-row-reverse">
           <input
-            type="number"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
             min={3}
             max={12}
-            value={paceMin}
-            onChange={(e) => handleMinChange(e.target.value)}
+            value={paceMinDraft}
+            onChange={(e) => {
+              const value = e.target.value.replace(/\D/g, '');
+              setPaceMinDraft(value);
+              commitMin(value);
+            }}
+            onBlur={() => {
+              const n = parseInt(paceMinDraft, 10);
+              if (isNaN(n) || n < 3 || n > 12) {
+                setPaceMinDraft(paceMin.toString());
+                return;
+              }
+              setPace(n, paceSec);
+              setPaceMinDraft(n.toString());
+            }}
             className="h-10 w-14 rounded-md border border-white/[0.06] bg-bg-surface-2 text-center text-lg font-medium text-text-primary outline-none focus:border-accent"
           />
           <span className="text-xl font-bold text-text-muted">:</span>
           <input
-            type="number"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
             min={0}
             max={59}
             step={15}
-            value={paceSec.toString().padStart(2, '0')}
-            onChange={(e) => handleSecChange(e.target.value)}
+            value={paceSecDraft}
+            onChange={(e) => {
+              const value = e.target.value.replace(/\D/g, '');
+              setPaceSecDraft(value);
+              commitSec(value);
+            }}
+            onBlur={() => {
+              const n = parseInt(paceSecDraft, 10);
+              if (isNaN(n) || n < 0 || n > 59) {
+                setPaceSecDraft(paceSec.toString().padStart(2, '0'));
+                return;
+              }
+              setPace(paceMin, n);
+              setPaceSecDraft(n.toString().padStart(2, '0'));
+            }}
             className="h-10 w-14 rounded-md border border-white/[0.06] bg-bg-surface-2 text-center text-lg font-medium text-text-primary outline-none focus:border-accent"
           />
         </div>
