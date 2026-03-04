@@ -148,3 +148,10 @@ safe.html
 .wrangler
 .dev.vars*
 !.dev.vars.example
+
+skills-lock.json
+skills
+.firecrawl
+
+.DS_Store
+generate_sqlite.py

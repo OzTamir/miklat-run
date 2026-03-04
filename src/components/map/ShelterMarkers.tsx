@@ -9,8 +9,6 @@ function ShelterPopup({ shelter }: { shelter: Shelter }) {
       <br />
       <span style={{ color: '#8b95a8' }}>סוג:</span> {shelter.type}
       <br />
-      <span style={{ color: '#8b95a8' }}>מצב:</span> {shelter.status}
-      <br />
       {shelter.area > 0 && (
         <>
           <span style={{ color: '#8b95a8' }}>שטח:</span> {shelter.area} מ&quot;ר

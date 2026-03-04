@@ -62,6 +62,7 @@ interface RouteState {
   toggleSidebar: () => void;
   setMobileDrawer: (expanded: boolean, size: 'half' | 'full') => void;
   setOverviewVisible: (visible: boolean) => void;
+  setShelters: (shelters: Shelter[]) => void;
 
   computedDistanceKm: () => number;
   canGenerate: () => boolean;
@@ -161,6 +162,10 @@ export const useRouteStore = create<RouteState>()(
   setOverviewVisible: (visible) => {
     set({ overviewVisible: visible });
     if (visible) trackEvent('Overview Opened');
+  },
+
+  setShelters: (shelters) => {
+    set({ shelters });
   },
 
   computedDistanceKm: () => {

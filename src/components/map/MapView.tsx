@@ -1,6 +1,7 @@
 import { MapContainer, TileLayer, ZoomControl } from 'react-leaflet';
 import { MapController } from './MapController';
 import { MapClickHandler } from './MapClickHandler';
+import { ShelterSync } from './ShelterSync';
 import { StartMarker } from './StartMarker';
 import { ShelterMarkers } from './ShelterMarkers';
 import { ActiveShelterMarkers } from './ActiveShelterMarkers';
@@ -31,6 +32,7 @@ export function MapView() {
       />
       <MapController />
       <MapClickHandler />
+      <ShelterSync />
       <StartMarker />
       <ShelterMarkers />
       <ActiveShelterMarkers />
