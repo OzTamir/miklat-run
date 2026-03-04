@@ -7,7 +7,7 @@ export function MapLegend() {
     <>
       <div
         dir="rtl"
-        className="fixed bottom-4 left-4 z-[1000] hidden rounded-lg border border-white/10 bg-bg-surface/95 p-3 text-start shadow-default backdrop-blur-sm md:block"
+        className="fixed bottom-4 left-4 z-20 hidden rounded-lg border border-white/10 bg-bg-surface/95 p-3 text-start shadow-default backdrop-blur-sm md:left-auto md:right-[356px] md:block"
       >
         <LegendContent />
       </div>
@@ -16,7 +16,7 @@ export function MapLegend() {
         type="button"
         onClick={() => setIsMobileLegendOpen(true)}
         aria-label="פתח מקרא"
-        className="fixed right-4 top-4 z-[1000] flex size-9 items-center justify-center rounded-full border border-white/15 bg-bg-surface/95 text-base font-semibold text-text-primary shadow-default backdrop-blur-sm md:hidden"
+        className="fixed right-4 top-4 z-40 flex size-9 items-center justify-center rounded-full border border-white/15 bg-bg-surface/95 text-base font-semibold text-text-primary shadow-default backdrop-blur-sm md:hidden"
       >
         i
       </button>

@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { useRouteStore } from '@/stores/route-store';
 import { computeSafetyStats } from '@/lib/routing';
+import { downloadRouteAsGpx } from '@/lib/gpx';
+import { trackEvent } from '@/lib/analytics';
 import { useRouteGeneration } from '@/hooks/useRouteGeneration';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MobileBottomDrawer, type DrawerSize } from '@/components/ui/MobileBottomDrawer';
@@ -65,6 +68,18 @@ export function RouteOverview() {
     void generate();
   }
 
+  function handleExportGpx() {
+    if (!routeData) return;
+
+    try {
+      downloadRouteAsGpx(routeData);
+      trackEvent('Route Exported', { format: 'gpx' });
+    } catch {
+      toast.error('ייצוא המסלול נכשל');
+      trackEvent('Route Export Failed', { format: 'gpx' });
+    }
+  }
+
   function handleMobileDrawerStateChange(expanded: boolean, size: DrawerSize) {
     if (!expanded) {
       setOverviewVisible(false);
@@ -119,6 +134,13 @@ export function RouteOverview() {
             ))}
           </div>
         </ScrollArea>
+        <OverviewActions
+          includeRouteControls={false}
+          isGenerating={isGenerating}
+          onRegenerate={handleRegenerate}
+          onStartOver={handleStartOver}
+          onExportGpx={handleExportGpx}
+        />
       </div>
 
       {/* Mobile: bottom sheet with drag + hard cap */}
@@ -156,28 +178,63 @@ export function RouteOverview() {
             ))}
           </div>
         </div>
-        <div className="shrink-0 border-t border-white/[0.06] px-5 py-4">
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={handleRegenerate}
-              disabled={isGenerating}
-              className="h-11 rounded-lg bg-accent text-[15px] font-semibold text-white transition-colors hover:bg-accent-hover disabled:opacity-50"
-            >
-              {isGenerating ? 'מחשב מסלול...' : 'חשב אלטרנטיבה'}
-            </button>
-            <button
-              type="button"
-              onClick={handleStartOver}
-              disabled={isGenerating}
-              className="h-11 rounded-lg border border-white/10 bg-bg-surface-2 text-[15px] font-semibold text-text-primary transition-colors hover:bg-bg-surface-3 disabled:opacity-50"
-            >
-              {'מסלול חדש'}
-            </button>
-          </div>
-        </div>
+        <OverviewActions
+          includeRouteControls
+          isGenerating={isGenerating}
+          onRegenerate={handleRegenerate}
+          onStartOver={handleStartOver}
+          onExportGpx={handleExportGpx}
+        />
       </MobileBottomDrawer>
     </>
+  );
+}
+
+function OverviewActions({
+  includeRouteControls,
+  isGenerating,
+  onRegenerate,
+  onStartOver,
+  onExportGpx,
+}: {
+  includeRouteControls: boolean;
+  isGenerating: boolean;
+  onRegenerate: () => void;
+  onStartOver: () => void;
+  onExportGpx: () => void;
+}) {
+  return (
+    <div className="shrink-0 border-t border-white/[0.06] px-5 py-4">
+      {includeRouteControls ? (
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={onRegenerate}
+            disabled={isGenerating}
+            className="h-11 rounded-lg bg-accent text-[15px] font-semibold text-white transition-colors hover:bg-accent-hover disabled:opacity-50"
+          >
+            {isGenerating ? 'מחשב מסלול...' : 'חשב אלטרנטיבה'}
+          </button>
+          <button
+            type="button"
+            onClick={onStartOver}
+            disabled={isGenerating}
+            className="h-11 rounded-lg border border-white/10 bg-bg-surface-2 text-[15px] font-semibold text-text-primary transition-colors hover:bg-bg-surface-3 disabled:opacity-50"
+          >
+            {'מסלול חדש'}
+          </button>
+        </div>
+      ) : null}
+      <button
+        type="button"
+        onClick={onExportGpx}
+        className={`h-11 w-full rounded-lg border border-accent/40 bg-accent/10 text-[15px] font-semibold text-accent transition-colors hover:bg-accent/20 ${
+          includeRouteControls ? 'mt-2' : ''
+        }`}
+      >
+        {'ייצוא GPX'}
+      </button>
+    </div>
   );
 }
 
