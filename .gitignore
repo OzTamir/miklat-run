@@ -155,3 +155,7 @@ skills
 
 .DS_Store
 generate_sqlite.py
+shelters.sql
+shelters.sqlite-shm
+shelters.sqlite-wal
+update_d1.sh
