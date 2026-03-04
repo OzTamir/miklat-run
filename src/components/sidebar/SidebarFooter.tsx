@@ -42,7 +42,7 @@ export function SidebarFooter() {
           <Github className="size-5" />
         </a>
       </div>
-      <BuyMeACoffee />
+      {/* <BuyMeACoffee /> */}
       <div className="flex items-center gap-3">
         <a href="mailto:help@miklat.run" className="text-[12px] text-text-secondary hover:text-text-primary transition-colors text-center underline">
           {'בעיות? תקלות? הצעות? שלחו לי מייל!'}
