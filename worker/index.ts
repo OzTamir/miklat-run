@@ -63,6 +63,7 @@ function jsonError(message: string, status: number): Response {
     headers: withCors(
       new Headers({
         'Content-Type': 'application/json; charset=utf-8',
+        'Cache-Control': 'no-store',
       }),
     ),
   });
@@ -259,13 +260,17 @@ async function handleNearbyShelters(request: Request, env: Env, ctx: ExecutionCo
   const cache = caches.default;
   const cacheKey = createCacheKey(request, normalizedPayload);
   const cachedResponse = await cache.match(cacheKey);
-  if (cachedResponse) {
+  if (cachedResponse?.ok) {
     const headers = withCors(new Headers(cachedResponse.headers));
     headers.set('X-Proxy-Cache', 'HIT');
     return new Response(cachedResponse.body, {
       status: cachedResponse.status,
       headers,
     });
+  }
+  if (cachedResponse) {
+    // Defensive cleanup for stale cache entries from previous behavior.
+    ctx.waitUntil(cache.delete(cacheKey));
   }
 
   if (!env.DB) {
