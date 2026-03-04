@@ -1,6 +1,8 @@
+import { useEffect, useState } from 'react';
 import { useRouteStore } from '@/stores/route-store';
 import { computeSafetyStats } from '@/lib/routing';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { MobileBottomDrawer, type DrawerSize } from '@/components/ui/MobileBottomDrawer';
 import { SegmentCard } from './SegmentCard';
 
 export function RouteOverview() {
@@ -22,6 +24,15 @@ export function RouteOverview() {
   const { safePercent } = computedSegments.length
     ? computeSafetyStats(computedSegments)
     : { safePercent: 0 };
+  const [mobileExpanded, setMobileExpanded] = useState(true);
+  const [mobileSize, setMobileSize] = useState<DrawerSize>('half');
+
+  useEffect(() => {
+    if (overviewVisible) {
+      setMobileExpanded(true);
+      setMobileSize('half');
+    }
+  }, [overviewVisible]);
 
   function handleClose() {
     setOverviewVisible(false);
@@ -32,6 +43,20 @@ export function RouteOverview() {
     clearRoute();
     setOverviewVisible(false);
     resetSegmentHighlight();
+  }
+
+  function handleMobileDrawerStateChange(expanded: boolean, size: DrawerSize) {
+    if (!expanded) {
+      handleClose();
+      return;
+    }
+    setMobileExpanded(expanded);
+    setMobileSize(size);
+  }
+
+  function handleMobileToggle() {
+    setMobileExpanded(true);
+    setMobileSize((prev) => (prev === 'half' ? 'full' : 'half'));
   }
 
   return (
@@ -65,25 +90,27 @@ export function RouteOverview() {
         </ScrollArea>
       </div>
 
-      {/* Mobile: bottom sheet (only drawer when route exists) — half screen, scrollable */}
-      <div
-        dir="rtl"
-        className={`fixed inset-x-0 bottom-0 z-40 flex h-[50vh] max-h-[50vh] flex-col rounded-t-2xl border-t border-white/[0.08] bg-bg-surface transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] md:hidden ${
-          overviewVisible
-            ? 'translate-y-0'
-            : 'translate-y-full'
-        }`}
-        onTouchStart={(e) => e.stopPropagation()}
+      {/* Mobile: bottom sheet with drag + hard cap */}
+      <MobileBottomDrawer
+        shown={overviewVisible}
+        expanded={mobileExpanded}
+        size={mobileSize}
+        onStateChange={handleMobileDrawerStateChange}
+        onHandleTap={handleMobileToggle}
+        topGap={64}
+        halfRatio={0.5}
+        zIndexClassName="z-40"
+        asideClassName="border-t border-white/[0.08]"
+        handleContainerClassName="flex w-full shrink-0 cursor-pointer flex-col items-stretch px-0 pt-2 touch-none"
+        handle={(
+          <OverviewHeader
+            distKm={distKm}
+            timeMin={timeMin}
+            safePercent={safePercent}
+            onClose={handleClose}
+          />
+        )}
       >
-        <div className="flex w-full shrink-0 flex-col items-center pt-2">
-          <div className="mb-2 h-1 w-9 rounded-full bg-white/20" />
-        </div>
-        <OverviewHeader
-          distKm={distKm}
-          timeMin={timeMin}
-          safePercent={safePercent}
-          onClose={handleClose}
-        />
         <div
           className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch]"
         >
@@ -107,7 +134,7 @@ export function RouteOverview() {
             {'התחל מחדש'}
           </button>
         </div>
-      </div>
+      </MobileBottomDrawer>
     </>
   );
 }
@@ -146,7 +173,10 @@ function OverviewHeader({
       </div>
       <button
         type="button"
-        onClick={onClose}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClose();
+        }}
         title={'סגור'}
         className="flex size-8 shrink-0 items-center justify-center rounded-md bg-bg-surface-2 text-[18px] text-text-secondary transition-colors duration-150 hover:bg-bg-surface-3 hover:text-text-primary"
       >

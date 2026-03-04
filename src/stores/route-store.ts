@@ -60,6 +60,7 @@ interface RouteState {
   resetSegmentHighlight: () => void;
   setLoading: (loading: boolean, message?: string) => void;
   toggleSidebar: () => void;
+  setMobileDrawer: (expanded: boolean, size: 'half' | 'full') => void;
   setOverviewVisible: (visible: boolean) => void;
 
   computedDistanceKm: () => number;
@@ -147,6 +148,9 @@ export const useRouteStore = create<RouteState>()(
       }
       return { sidebarExpanded: false, mobileDrawerSize: 'half' };
     }),
+
+  setMobileDrawer: (expanded, size) =>
+    set({ sidebarExpanded: expanded, mobileDrawerSize: size }),
 
   setOverviewVisible: (visible) => {
     set({ overviewVisible: visible });

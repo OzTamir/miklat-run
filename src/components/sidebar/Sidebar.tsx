@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { useRouteStore } from '@/stores/route-store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { MobileBottomDrawer } from '@/components/ui/MobileBottomDrawer';
 import { AddressSearch } from './AddressSearch';
 import { ModeToggle } from './ModeToggle';
 import { DistanceMode } from './DistanceMode';
@@ -75,14 +76,44 @@ interface SidebarProps {
   children?: ReactNode;
 }
 
+const TOP_GAP = 64;
+
+function DrawerSections({ children, includeFooter }: { children?: ReactNode; includeFooter?: boolean }) {
+  return (
+    <div data-sidebar-content className="flex flex-col gap-0">
+      <SidebarSection>
+        <AddressSearch />
+      </SidebarSection>
+      <SidebarSection>
+        <div className="text-[13px] font-medium text-text-primary mb-3 text-start">
+          {'תכנון מסלול'}
+        </div>
+        <ModeToggle />
+        <DistanceMode />
+        <PaceMode />
+        <BiasToggle />
+      </SidebarSection>
+      <SidebarSection>
+        <GenerateButton />
+      </SidebarSection>
+      <SidebarSection>
+        <RouteInfo />
+      </SidebarSection>
+      <SidebarSection>
+        <HowItWorks />
+      </SidebarSection>
+      {children}
+      {includeFooter ? <SidebarFooter /> : null}
+    </div>
+  );
+}
+
 export function Sidebar({ children }: SidebarProps) {
   const sidebarExpanded = useRouteStore((s) => s.sidebarExpanded);
   const mobileDrawerSize = useRouteStore((s) => s.mobileDrawerSize);
   const toggleSidebar = useRouteStore((s) => s.toggleSidebar);
+  const setMobileDrawer = useRouteStore((s) => s.setMobileDrawer);
   const routeData = useRouteStore((s) => s.routeData);
-
-  const mobileHeight =
-    mobileDrawerSize === 'full' ? '90dvh' : '48vh';
 
   const showMobileConfig = !routeData;
 
@@ -95,85 +126,31 @@ export function Sidebar({ children }: SidebarProps) {
         </div>
         <Separator className="bg-white/[0.04]" />
         <ScrollArea className="flex-1">
-          <div data-sidebar-content className="flex flex-col gap-0">
-            <SidebarSection>
-              <AddressSearch />
-            </SidebarSection>
-            <SidebarSection>
-              <div className="text-[13px] font-medium text-text-primary mb-3 text-start">
-                {'תכנון מסלול'}
-              </div>
-              <ModeToggle />
-              <DistanceMode />
-              <PaceMode />
-              <BiasToggle />
-            </SidebarSection>
-            <SidebarSection>
-              <GenerateButton />
-            </SidebarSection>
-            <SidebarSection>
-              <RouteInfo />
-            </SidebarSection>
-            <SidebarSection>
-              <HowItWorks />
-            </SidebarSection>
-            {children}
-          </div>
+          <DrawerSections>{children}</DrawerSections>
         </ScrollArea>
         <SidebarFooter />
       </aside>
 
-      {/* Mobile: bottom sheet (hidden when a route is generated — overview is shown instead) */}
+      {/* Mobile: bottom sheet with drag handle */}
       {showMobileConfig && (
-      <aside
-        dir="rtl"
-        className={`fixed inset-x-0 bottom-0 z-40 flex flex-col bg-bg-surface rounded-t-2xl shadow-[0_-8px_32px_rgba(0,0,0,0.4)] transition-[transform,max-height] duration-300 ease-out md:hidden ${
-          sidebarExpanded
-            ? 'translate-y-0'
-            : 'translate-y-[calc(100%-56px)]'
-        }`}
-        style={{ maxHeight: sidebarExpanded ? mobileHeight : '56px' }}
-        onTouchStart={(e) => e.stopPropagation()}
-      >
-        <button
-          type="button"
-          onClick={toggleSidebar}
-          className="flex w-full shrink-0 cursor-pointer flex-col items-center px-5 py-3"
+        <MobileBottomDrawer
+          shown
+          expanded={sidebarExpanded}
+          size={mobileDrawerSize}
+          onStateChange={setMobileDrawer}
+          onHandleTap={toggleSidebar}
+          topGap={TOP_GAP}
+          halfRatio={0.48}
+          zIndexClassName="z-40"
+          handle={<SidebarHeader />}
         >
-          <div className="mb-3 h-1 w-9 rounded-full bg-white/20" />
-          <SidebarHeader />
-        </button>
-        <Separator className="shrink-0 bg-white/[0.04]" />
-        <div
-          className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch]"
-        >
-          <div data-sidebar-content className="flex flex-col gap-0">
-            <SidebarSection>
-              <AddressSearch />
-            </SidebarSection>
-            <SidebarSection>
-              <div className="text-[13px] font-medium text-text-primary mb-3 text-start">
-                {'תכנון מסלול'}
-              </div>
-              <ModeToggle />
-              <DistanceMode />
-              <PaceMode />
-              <BiasToggle />
-            </SidebarSection>
-            <SidebarSection>
-              <GenerateButton />
-            </SidebarSection>
-            <SidebarSection>
-              <RouteInfo />
-            </SidebarSection>
-            <SidebarSection>
-              <HowItWorks />
-            </SidebarSection>
-            {children}
-            <SidebarFooter />
+          <Separator className="shrink-0 bg-white/[0.04]" />
+          <div
+            className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch]"
+          >
+            <DrawerSections includeFooter>{children}</DrawerSections>
           </div>
-        </div>
-      </aside>
+        </MobileBottomDrawer>
       )}
     </>
   );
