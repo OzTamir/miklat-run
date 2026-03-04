@@ -9,6 +9,7 @@ import type {
   Shelter,
 } from '@/types';
 import { SHELTERS } from '@/data';
+import { RISK_TOLERANCE_CONSTS } from '@/lib/routing';
 
 const STORAGE_KEY = 'miklat-run-settings';
 
@@ -18,6 +19,7 @@ interface PersistedSettings {
   startAddress: string;
   routeMode: RouteMode;
   targetDistanceKm: number;
+  allowedAvgShelterTimeSec: number;
   paceMin: number;
   paceSec: number;
   timeMinutes: number;
@@ -29,6 +31,7 @@ interface RouteState {
 
   routeMode: RouteMode;
   targetDistanceKm: number;
+  allowedAvgShelterTimeSec: number;
   paceMin: number;
   paceSec: number;
   timeMinutes: number;
@@ -48,6 +51,7 @@ interface RouteState {
   setStartPoint: (latlng: LatLng, address?: string) => void;
   setRouteMode: (mode: RouteMode) => void;
   setTargetDistance: (km: number) => void;
+  setAllowedAvgShelterTimeSec: (sec: number) => void;
   setPace: (min: number, sec: number) => void;
   setTimeMinutes: (min: number) => void;
   setRouteResult: (data: RouteData, segments: RouteSegment[]) => void;
@@ -71,6 +75,7 @@ export const useRouteStore = create<RouteState>()(
 
   routeMode: 'distance',
   targetDistanceKm: 5,
+  allowedAvgShelterTimeSec: RISK_TOLERANCE_CONSTS.defaultAllowedAvgShelterTimeSec,
   paceMin: 6,
   paceSec: 0,
   timeMinutes: 30,
@@ -98,6 +103,14 @@ export const useRouteStore = create<RouteState>()(
   },
 
   setTargetDistance: (km) => set({ targetDistanceKm: km }),
+
+  setAllowedAvgShelterTimeSec: (sec) => {
+    const min = RISK_TOLERANCE_CONSTS.minAllowedAvgShelterTimeSec;
+    const max = RISK_TOLERANCE_CONSTS.maxAllowedAvgShelterTimeSec;
+    const clamped = Math.max(min, Math.min(max, sec));
+    set({ allowedAvgShelterTimeSec: clamped });
+    trackEvent('Risk Tolerance Changed', { allowedAvgShelterTimeSec: String(clamped) });
+  },
 
   setPace: (min, sec) => set({ paceMin: min, paceSec: sec }),
 
@@ -165,6 +178,7 @@ export const useRouteStore = create<RouteState>()(
         startAddress: state.startAddress,
         routeMode: state.routeMode,
         targetDistanceKm: state.targetDistanceKm,
+        allowedAvgShelterTimeSec: state.allowedAvgShelterTimeSec,
         paceMin: state.paceMin,
         paceSec: state.paceSec,
         timeMinutes: state.timeMinutes,

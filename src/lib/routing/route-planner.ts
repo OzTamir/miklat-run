@@ -26,14 +26,20 @@ function normalizeBearingDelta(delta: number): number {
     : wrapped;
 }
 
-export function planRouteWaypoints(start: LatLng, targetDistM: number, shelters: Shelter[]): LatLng[] {
+export function planRouteWaypoints(
+  start: LatLng,
+  targetDistM: number,
+  shelters: Shelter[],
+  riskFactor = 0,
+): LatLng[] {
+  const clampedRisk = Math.max(0, Math.min(1, riskFactor));
   const maxEdge = Math.max(
     ROUTE_PLANNER_CONSTS.maxEdgeMinM,
     Math.min(
       ROUTE_PLANNER_CONSTS.maxEdgeMaxM,
       targetDistM / ROUTE_PLANNER_CONSTS.maxEdgeTargetDivisorM,
     ),
-  );
+  ) * (1 + ROUTE_PLANNER_CONSTS.riskMaxEdgeBoostRatio * clampedRisk);
 
   const indexedShelters: IndexedShelter[] = shelters.map((s, i) => ({
     ...s,
@@ -48,11 +54,11 @@ export function planRouteWaypoints(start: LatLng, targetDistM: number, shelters:
       ROUTE_PLANNER_CONSTS.loopPointsMax,
       Math.round(targetDistM / ROUTE_PLANNER_CONSTS.loopPointDistanceDivisorM),
     ),
-  );
+  ) - Math.round(ROUTE_PLANNER_CONSTS.riskLoopPointReduction * clampedRisk);
   const searchRadius = Math.max(
     ROUTE_PLANNER_CONSTS.shelterSearchRadiusMinM,
     loopRadius * ROUTE_PLANNER_CONSTS.shelterSearchRadiusLoopMultiplier,
-  );
+  ) * (1 + ROUTE_PLANNER_CONSTS.riskSearchRadiusBoostRatio * clampedRisk);
 
   const allShelters = indexedShelters
     .filter((s) => s.distToStart <= searchRadius)
@@ -72,6 +78,7 @@ export function planRouteWaypoints(start: LatLng, targetDistM: number, shelters:
       maxEdge,
       targetDistM,
       attempt.ellipseRatio,
+      clampedRisk,
     );
 
     if (route && route.score > bestScore) {
@@ -121,7 +128,9 @@ export function tryBuildLoop(
   maxEdge: number,
   targetDistM: number,
   ellipseRatio: number,
+  riskFactor = 0,
 ): LoopResult | null {
+  const clampedRisk = Math.max(0, Math.min(1, riskFactor));
   const DEG_PER_M_LAT = 1 / ROUTE_PLANNER_CONSTS.metersPerDegree;
   const DEG_PER_M_LNG = 1 / (
     ROUTE_PLANNER_CONSTS.metersPerDegree
@@ -194,9 +203,11 @@ export function tryBuildLoop(
       const edgeTargetPenalty = Math.abs(dFromPrev - maxEdge * ROUTE_PLANNER_CONSTS.edgeTargetRatio)
         * ROUTE_PLANNER_CONSTS.edgeTargetPenaltyWeight;
       const shortHopPenalty = dFromPrev < maxEdge * ROUTE_PLANNER_CONSTS.shortHopRatio
-        ? (maxEdge * ROUTE_PLANNER_CONSTS.shortHopRatio - dFromPrev) * ROUTE_PLANNER_CONSTS.shortHopPenaltyWeight
+        ? (maxEdge * ROUTE_PLANNER_CONSTS.shortHopRatio - dFromPrev)
+          * (ROUTE_PLANNER_CONSTS.shortHopPenaltyWeight + ROUTE_PLANNER_CONSTS.riskShortHopPenaltyBoost * clampedRisk)
         : 0;
-      const headingPenalty = headingDelta * ROUTE_PLANNER_CONSTS.headingPenaltyWeight;
+      const headingPenalty = headingDelta
+        * (ROUTE_PLANNER_CONSTS.headingPenaltyWeight + ROUTE_PLANNER_CONSTS.riskHeadingPenaltyBoost * clampedRisk);
       const candidateScore = idealDist
         + dFromPrev * ROUTE_PLANNER_CONSTS.candidateDistanceWeight
         + edgeTargetPenalty
@@ -215,7 +226,15 @@ export function tryBuildLoop(
 
       if (gap > maxEdge) {
         const bridgeBearing = calcBearing(prevPos.lat, prevPos.lng, best.lat, best.lng);
-        const bridged = bridgeShelters(prevPos, best, allShelters, usedShelters, maxEdge, bridgeBearing);
+        const bridged = bridgeShelters(
+          prevPos,
+          best,
+          allShelters,
+          usedShelters,
+          maxEdge,
+          bridgeBearing,
+          clampedRisk,
+        );
         for (const bs of bridged) {
           appendWaypoint({ lat: bs.lat, lng: bs.lng });
           usedShelters.add(bs.idx);
@@ -233,7 +252,15 @@ export function tryBuildLoop(
   const distBack = haversine(prevPos.lat, prevPos.lng, start.lat, start.lng);
   if (distBack > maxEdge) {
     const bridgeBearing = calcBearing(prevPos.lat, prevPos.lng, start.lat, start.lng);
-    const bridged = bridgeShelters(prevPos, start, allShelters, usedShelters, maxEdge, bridgeBearing);
+    const bridged = bridgeShelters(
+      prevPos,
+      start,
+      allShelters,
+      usedShelters,
+      maxEdge,
+      bridgeBearing,
+      clampedRisk,
+    );
     for (const bs of bridged) {
       appendWaypoint({ lat: bs.lat, lng: bs.lng });
       usedShelters.add(bs.idx);
@@ -254,9 +281,15 @@ export function tryBuildLoop(
   );
   const smoothnessScore = headingSmoothness * ROUTE_PLANNER_CONSTS.smoothnessHeadingWeight
     + (1 - bridgePenalty) * ROUTE_PLANNER_CONSTS.smoothnessBridgeWeight;
-  const score = distRatio * ROUTE_PLANNER_CONSTS.scoreDistanceWeight
-    + shelterScore * ROUTE_PLANNER_CONSTS.scoreShelterWeight
-    + smoothnessScore * ROUTE_PLANNER_CONSTS.scoreSmoothnessWeight;
+  const distanceWeight = ROUTE_PLANNER_CONSTS.scoreDistanceWeight
+    - (ROUTE_PLANNER_CONSTS.scoreDistanceWeight - ROUTE_PLANNER_CONSTS.riskScoreDistanceWeightMin) * clampedRisk;
+  const shelterWeight = ROUTE_PLANNER_CONSTS.scoreShelterWeight
+    - (ROUTE_PLANNER_CONSTS.scoreShelterWeight - ROUTE_PLANNER_CONSTS.riskScoreShelterWeightMin) * clampedRisk;
+  const smoothnessWeight = ROUTE_PLANNER_CONSTS.scoreSmoothnessWeight
+    + (ROUTE_PLANNER_CONSTS.riskScoreSmoothnessWeightMax - ROUTE_PLANNER_CONSTS.scoreSmoothnessWeight) * clampedRisk;
+  const score = distRatio * distanceWeight
+    + shelterScore * shelterWeight
+    + smoothnessScore * smoothnessWeight;
 
   return { waypoints, score, shelterCount, estDist: estRouteDist };
 }
@@ -268,11 +301,18 @@ export function bridgeShelters(
   usedShelters: Set<number>,
   maxEdge: number,
   preferredBearing?: number,
+  riskFactor = 0,
 ): IndexedShelter[] {
+  const clampedRisk = Math.max(0, Math.min(1, riskFactor));
   const result: IndexedShelter[] = [];
   let current = from;
   const targetDist = haversine(from.lat, from.lng, to.lat, to.lng);
-  const maxSteps = Math.min(ROUTE_PLANNER_CONSTS.bridgeMaxSteps, Math.ceil(targetDist / maxEdge));
+  const allowedSteps = Math.max(
+    1,
+    ROUTE_PLANNER_CONSTS.bridgeMaxSteps
+      - Math.round(ROUTE_PLANNER_CONSTS.riskBridgeStepReduction * clampedRisk),
+  );
+  const maxSteps = Math.min(allowedSteps, Math.ceil(targetDist / maxEdge));
 
   for (let step = 0; step < maxSteps; step++) {
     const distToTarget = haversine(current.lat, current.lng, to.lat, to.lng);
@@ -293,7 +333,10 @@ export function bridgeShelters(
 
       if (dFromCurr <= maxEdge && dFromCurr > ROUTE_PLANNER_CONSTS.bridgeMinStepDistanceM) {
         const progress = distToTarget - dToTarget;
-        if (progress > maxEdge * ROUTE_PLANNER_CONSTS.bridgeProgressMinRatio) {
+        if (
+          progress > maxEdge
+          * (ROUTE_PLANNER_CONSTS.bridgeProgressMinRatio + ROUTE_PLANNER_CONSTS.riskBridgeProgressRatioBoost * clampedRisk)
+        ) {
           const detour = dFromCurr + dToTarget - distToTarget;
           const stepBearing = calcBearing(current.lat, current.lng, s.lat, s.lng);
           const headingPenalty = preferredBearing === undefined

@@ -4,7 +4,16 @@ export const ROUTING_SHARED_CONSTS = {
   degreesInCircle: 360,
   halfCircleDegrees: 180,
   metersPerKilometer: 1000,
+  secondsPerMinute: 60,
   percentScale: 100,
+} as const;
+
+export const RISK_TOLERANCE_CONSTS = {
+  minAllowedAvgShelterTimeSec: 60,
+  maxAllowedAvgShelterTimeSec: 210,
+  defaultAllowedAvgShelterTimeSec: 120,
+  sliderStepSec: 15,
+  shelterApproachSpeedMps: 2.4,
 } as const;
 
 export const SAFETY_ZONE_COLORS: Record<SafetyZone, string> = {
@@ -67,6 +76,16 @@ export const ROUTE_PLANNER_CONSTS = {
   bridgeProgressMinRatio: 0.14,
   bridgeDetourPenaltyWeight: 1.35,
   bridgeHeadingPenaltyWeight: 2.4,
+  riskMaxEdgeBoostRatio: 0.42,
+  riskLoopPointReduction: 2,
+  riskSearchRadiusBoostRatio: 0.22,
+  riskShortHopPenaltyBoost: 0.5,
+  riskHeadingPenaltyBoost: 1.0,
+  riskBridgeStepReduction: 2,
+  riskBridgeProgressRatioBoost: 0.16,
+  riskScoreDistanceWeightMin: 0.58,
+  riskScoreShelterWeightMin: 0.04,
+  riskScoreSmoothnessWeightMax: 0.38,
 } as const;
 
 export const ROUTE_PLANNER_ATTEMPT_CONFIGS: ReadonlyArray<{
@@ -147,6 +166,15 @@ export const ROUTE_SEARCH_CONSTS = {
   maxScatterCandidates: 12,
   turnDensityTieBreakEpsilon: 0.01,
   initialScaleFactor: 1.0,
+  riskQualityDistanceWeightMin: 0.42,
+  riskQualityTurnWeightMax: 0.38,
+  riskQualityContinuityWeightMax: 0.2,
+  riskMinGapBoostRatio: 0.45,
+  riskMinVerticesReduction: 2,
+  riskModestTurnBoostDeg: 26,
+  riskNearStraightBoostDeg: 10,
+  riskMaxPointsReduction: 2,
+  riskTieToleranceBoostRatio: 0.45,
 } as const;
 
 export const ROUTE_SEARCH_TURN_MANEUVER_TYPES = [

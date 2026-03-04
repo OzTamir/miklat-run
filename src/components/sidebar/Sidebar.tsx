@@ -7,6 +7,7 @@ import { AddressSearch } from './AddressSearch';
 import { ModeToggle } from './ModeToggle';
 import { DistanceMode } from './DistanceMode';
 import { PaceMode } from './PaceMode';
+import { RiskSlider } from './RiskSlider';
 import { GenerateButton } from './GenerateButton';
 import { RouteInfo } from './RouteInfo';
 import { HowItWorks } from './HowItWorks';
@@ -90,6 +91,7 @@ function DrawerSections({ children, includeFooter }: { children?: ReactNode; inc
         <ModeToggle />
         <DistanceMode />
         <PaceMode />
+        <RiskSlider />
       </SidebarSection>
       <SidebarSection>
         <GenerateButton />

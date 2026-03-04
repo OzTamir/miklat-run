@@ -3,6 +3,7 @@ import { calcBearing, haversine } from '@/lib/geo';
 import { getOSRMRoute } from '@/lib/api';
 import { planRouteWaypoints } from './route-planner';
 import {
+  RISK_TOLERANCE_CONSTS,
   ROUTING_SHARED_CONSTS,
   ROUTE_SEARCH_CONSTS,
   ROUTE_SEARCH_LOCAL_REFINEMENT_OFFSETS,
@@ -38,6 +39,13 @@ function clamp(num: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, num));
 }
 
+function toRiskFactor(allowedAvgShelterTimeSec: number): number {
+  const min = RISK_TOLERANCE_CONSTS.minAllowedAvgShelterTimeSec;
+  const max = RISK_TOLERANCE_CONSTS.maxAllowedAvgShelterTimeSec;
+  const clamped = clamp(allowedAvgShelterTimeSec, min, max);
+  return (clamped - min) / Math.max(1, max - min);
+}
+
 function estimateScaleFromBounds(
   lowerBound: RouteCandidate,
   upperBound: RouteCandidate,
@@ -59,6 +67,7 @@ function buildCandidate(
   routeData: RouteData,
   targetDistM: number,
   sf: number,
+  riskFactor: number,
 ): RouteCandidate {
   const actualDist = getRouteDistance(routeData);
   const distError = Math.abs(actualDist - targetDistM) / targetDistM;
@@ -104,9 +113,15 @@ function buildCandidate(
     targetDistM * ROUTE_SEARCH_CONSTS.continuityTargetRatio,
   );
   const continuityScore = Math.min(1, longestContinueM / continuityTarget);
-  const qualityScore = distanceScore * ROUTE_SEARCH_CONSTS.qualityDistanceWeight
-    + turnScore * ROUTE_SEARCH_CONSTS.qualityTurnWeight
-    + continuityScore * ROUTE_SEARCH_CONSTS.qualityContinuityWeight;
+  const distanceWeight = ROUTE_SEARCH_CONSTS.qualityDistanceWeight
+    - (ROUTE_SEARCH_CONSTS.qualityDistanceWeight - ROUTE_SEARCH_CONSTS.riskQualityDistanceWeightMin) * riskFactor;
+  const turnWeight = ROUTE_SEARCH_CONSTS.qualityTurnWeight
+    + (ROUTE_SEARCH_CONSTS.riskQualityTurnWeightMax - ROUTE_SEARCH_CONSTS.qualityTurnWeight) * riskFactor;
+  const continuityWeight = ROUTE_SEARCH_CONSTS.qualityContinuityWeight
+    + (ROUTE_SEARCH_CONSTS.riskQualityContinuityWeightMax - ROUTE_SEARCH_CONSTS.qualityContinuityWeight) * riskFactor;
+  const qualityScore = distanceScore * distanceWeight
+    + turnScore * turnWeight
+    + continuityScore * continuityWeight;
 
   return {
     routeData,
@@ -144,7 +159,11 @@ function thinUniform(points: LatLng[], maxPoints: number): LatLng[] {
   return result;
 }
 
-function optimizeWaypointsForContinuity(waypoints: LatLng[], targetDistM: number): LatLng[] {
+function optimizeWaypointsForContinuity(
+  waypoints: LatLng[],
+  targetDistM: number,
+  riskFactor: number,
+): LatLng[] {
   if (waypoints.length <= ROUTE_SEARCH_CONSTS.optimizeMinWaypointCount) {
     return waypoints;
   }
@@ -161,7 +180,7 @@ function optimizeWaypointsForContinuity(waypoints: LatLng[], targetDistM: number
   const minGap = Math.max(
     ROUTE_SEARCH_CONSTS.optimizeMinGapM,
     targetDistM * ROUTE_SEARCH_CONSTS.optimizeMinGapTargetRatio,
-  );
+  ) * (1 + ROUTE_SEARCH_CONSTS.riskMinGapBoostRatio * riskFactor);
   const deduped: LatLng[] = [core[0]];
   for (let i = 1; i < core.length; i++) {
     const curr = core[i];
@@ -178,7 +197,7 @@ function optimizeWaypointsForContinuity(waypoints: LatLng[], targetDistM: number
     ROUTE_SEARCH_CONSTS.optimizeMinVerticesBase,
     Math.round(targetDistM / ROUTE_SEARCH_CONSTS.optimizeMinVerticesDistanceDivisorM)
       + ROUTE_SEARCH_CONSTS.optimizeMinVerticesOffset,
-  );
+  ) - Math.round(ROUTE_SEARCH_CONSTS.riskMinVerticesReduction * riskFactor);
   const smoothed: LatLng[] = [deduped[0]];
   for (let i = 1; i < deduped.length - 1; i++) {
     const prev = smoothed[smoothed.length - 1];
@@ -206,8 +225,14 @@ function optimizeWaypointsForContinuity(waypoints: LatLng[], targetDistM: number
       ROUTE_SEARCH_CONSTS.optimizeShortConnectorMinM,
       targetDistM * ROUTE_SEARCH_CONSTS.optimizeShortConnectorTargetRatio,
     );
-    const modestTurn = turnDelta < ROUTE_SEARCH_CONSTS.optimizeModestTurnMaxDeg;
-    const nearStraight = turnDelta < ROUTE_SEARCH_CONSTS.optimizeNearStraightMaxDeg;
+    const modestTurn = turnDelta < (
+      ROUTE_SEARCH_CONSTS.optimizeModestTurnMaxDeg
+      + ROUTE_SEARCH_CONSTS.riskModestTurnBoostDeg * riskFactor
+    );
+    const nearStraight = turnDelta < (
+      ROUTE_SEARCH_CONSTS.optimizeNearStraightMaxDeg
+      + ROUTE_SEARCH_CONSTS.riskNearStraightBoostDeg * riskFactor
+    );
     const tinyDetour = detour < Math.max(
       ROUTE_SEARCH_CONSTS.optimizeTinyDetourMinM,
       targetDistM * ROUTE_SEARCH_CONSTS.optimizeTinyDetourTargetRatio,
@@ -228,19 +253,21 @@ function optimizeWaypointsForContinuity(waypoints: LatLng[], targetDistM: number
       Math.round(targetDistM / ROUTE_SEARCH_CONSTS.optimizeThinnedDistanceDivisorM)
         + ROUTE_SEARCH_CONSTS.optimizeThinnedOffset,
     ),
-  );
+  ) - Math.round(ROUTE_SEARCH_CONSTS.riskMaxPointsReduction * riskFactor);
   return thinUniform(smoothed, maxPoints);
 }
 
 export async function searchForRoutes(
   start: LatLng,
   targetDistM: number,
+  allowedAvgShelterTimeSec: number,
   extended: boolean,
   shelters: Shelter[],
   onProgress?: (message: string) => void,
 ): Promise<RouteCandidate[]> {
   const candidates: RouteCandidate[] = [];
   const evaluatedScaleFactors = new Set<string>();
+  const riskFactor = toRiskFactor(allowedAvgShelterTimeSec);
 
   const pushCandidate = (candidate: RouteCandidate): void => {
     if (candidate.distError > ROUTE_SEARCH_CONSTS.maxCandidateDistanceErrorRatio) {
@@ -266,14 +293,19 @@ export async function searchForRoutes(
     }
 
     evaluatedScaleFactors.add(sfKey);
-    const rawWaypoints = planRouteWaypoints(start, targetDistM * normalized, shelters);
-    const waypoints = optimizeWaypointsForContinuity(rawWaypoints, targetDistM);
+    const rawWaypoints = planRouteWaypoints(
+      start,
+      targetDistM * normalized,
+      shelters,
+      riskFactor,
+    );
+    const waypoints = optimizeWaypointsForContinuity(rawWaypoints, targetDistM, riskFactor);
     if (waypoints.length < 2) {
       return null;
     }
 
     const routeData = await getOSRMRoute(waypoints);
-    return buildCandidate(routeData, targetDistM, normalized);
+    return buildCandidate(routeData, targetDistM, normalized, riskFactor);
   };
 
   let sf: number = ROUTE_SEARCH_CONSTS.initialScaleFactor;
@@ -411,15 +443,17 @@ export async function searchForRoutes(
 export function selectClosestRoute(
   candidates: RouteCandidate[],
   targetDistM: number,
+  allowedAvgShelterTimeSec: number = RISK_TOLERANCE_CONSTS.defaultAllowedAvgShelterTimeSec,
 ): RouteData | null {
   if (candidates.length === 0) {
     return null;
   }
 
+  const riskFactor = toRiskFactor(allowedAvgShelterTimeSec);
   const tieTolerance = Math.max(
     ROUTE_SEARCH_CONSTS.distanceTieToleranceMinM,
     targetDistM * ROUTE_SEARCH_CONSTS.distanceTieToleranceRatio,
-  );
+  ) * (1 + ROUTE_SEARCH_CONSTS.riskTieToleranceBoostRatio * riskFactor);
 
   const ranked = [...candidates].sort((a, b) => {
     const aErr = Math.abs(a.actualDist - targetDistM);
@@ -450,6 +484,7 @@ export function selectClosestRoute(
 export interface GenerateRouteParams {
   start: LatLng;
   targetDistKm: number;
+  allowedAvgShelterTimeSec: number;
   isRetry: boolean;
   shelters: Shelter[];
   onProgress?: (message: string) => void;
@@ -463,13 +498,27 @@ export interface GenerateRouteResult {
 }
 
 export async function generateRoute(params: GenerateRouteParams): Promise<GenerateRouteResult | null> {
-  const { start, targetDistKm, isRetry, shelters, onProgress } = params;
+  const {
+    start,
+    targetDistKm,
+    allowedAvgShelterTimeSec,
+    isRetry,
+    shelters,
+    onProgress,
+  } = params;
   const targetDistM = targetDistKm * ROUTING_SHARED_CONSTS.metersPerKilometer;
 
   onProgress?.('מחפש מקלטים בקרבת מקום...');
-  const candidates = await searchForRoutes(start, targetDistM, isRetry, shelters, onProgress);
+  const candidates = await searchForRoutes(
+    start,
+    targetDistM,
+    allowedAvgShelterTimeSec,
+    isRetry,
+    shelters,
+    onProgress,
+  );
   const bestRouteData = candidates.length > 0
-    ? selectClosestRoute(candidates, targetDistM)
+    ? selectClosestRoute(candidates, targetDistM, allowedAvgShelterTimeSec)
     : null;
 
   if (!bestRouteData) {

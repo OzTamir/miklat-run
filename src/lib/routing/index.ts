@@ -4,6 +4,7 @@ export { planRouteWaypoints, tryBuildLoop, bridgeShelters } from './route-planne
 export { searchForRoutes, selectClosestRoute, generateRoute } from './route-search';
 export {
   ROUTING_SHARED_CONSTS,
+  RISK_TOLERANCE_CONSTS,
   ROUTE_SEARCH_CONSTS,
   ROUTE_SEARCH_LOCAL_REFINEMENT_OFFSETS,
   ROUTE_SEARCH_SCATTER_FACTORS_EXTENDED,
