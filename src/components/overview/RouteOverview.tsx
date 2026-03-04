@@ -1,9 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useRouteStore } from '@/stores/route-store';
 import { computeSafetyStats } from '@/lib/routing';
+import { useRouteGeneration } from '@/hooks/useRouteGeneration';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MobileBottomDrawer, type DrawerSize } from '@/components/ui/MobileBottomDrawer';
 import { SegmentCard } from './SegmentCard';
+
+const MD_BREAKPOINT = 768;
+
+function isMobileViewport(): boolean {
+  return window.innerWidth < MD_BREAKPOINT;
+}
 
 export function RouteOverview() {
   const overviewVisible = useRouteStore((s) => s.overviewVisible);
@@ -16,6 +23,7 @@ export function RouteOverview() {
   const routeData = useRouteStore((s) => s.routeData);
   const paceMin = useRouteStore((s) => s.paceMin);
   const paceSec = useRouteStore((s) => s.paceSec);
+  const { generate, isGenerating } = useRouteGeneration();
 
   const distKm = routeData ? (routeData.distance / 1000).toFixed(1) : '-';
   const timeMin = routeData
@@ -35,6 +43,14 @@ export function RouteOverview() {
   }, [overviewVisible]);
 
   function handleClose() {
+    if (isMobileViewport()) {
+      setOverviewVisible(false);
+      setMobileExpanded(false);
+      setMobileSize('half');
+      resetSegmentHighlight();
+      return;
+    }
+
     setOverviewVisible(false);
     resetSegmentHighlight();
   }
@@ -45,16 +61,31 @@ export function RouteOverview() {
     resetSegmentHighlight();
   }
 
+  function handleRegenerate() {
+    void generate();
+  }
+
   function handleMobileDrawerStateChange(expanded: boolean, size: DrawerSize) {
     if (!expanded) {
-      handleClose();
+      setOverviewVisible(false);
+      setMobileExpanded(false);
+      setMobileSize('half');
+      resetSegmentHighlight();
       return;
     }
-    setMobileExpanded(expanded);
+    setOverviewVisible(true);
+    setMobileExpanded(true);
     setMobileSize(size);
   }
 
   function handleMobileToggle() {
+    if (!overviewVisible || !mobileExpanded) {
+      setOverviewVisible(true);
+      setMobileExpanded(true);
+      setMobileSize('half');
+      return;
+    }
+
     setMobileExpanded(true);
     setMobileSize((prev) => (prev === 'half' ? 'full' : 'half'));
   }
@@ -92,8 +123,8 @@ export function RouteOverview() {
 
       {/* Mobile: bottom sheet with drag + hard cap */}
       <MobileBottomDrawer
-        shown={overviewVisible}
-        expanded={mobileExpanded}
+        shown={Boolean(routeData)}
+        expanded={overviewVisible && mobileExpanded}
         size={mobileSize}
         onStateChange={handleMobileDrawerStateChange}
         onHandleTap={handleMobileToggle}
@@ -126,13 +157,24 @@ export function RouteOverview() {
           </div>
         </div>
         <div className="shrink-0 border-t border-white/[0.06] px-5 py-4">
-          <button
-            type="button"
-            onClick={handleStartOver}
-            className="w-full rounded-lg bg-accent py-3 text-[15px] font-semibold text-white transition-colors hover:opacity-90"
-          >
-            {'התחל מחדש'}
-          </button>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={handleRegenerate}
+              disabled={isGenerating}
+              className="h-11 rounded-lg bg-accent text-[15px] font-semibold text-white transition-colors hover:bg-accent-hover disabled:opacity-50"
+            >
+              {isGenerating ? 'מחשב מסלול...' : 'חשב אלטרנטיבה'}
+            </button>
+            <button
+              type="button"
+              onClick={handleStartOver}
+              disabled={isGenerating}
+              className="h-11 rounded-lg border border-white/10 bg-bg-surface-2 text-[15px] font-semibold text-text-primary transition-colors hover:bg-bg-surface-3 disabled:opacity-50"
+            >
+              {'מסלול חדש'}
+            </button>
+          </div>
         </div>
       </MobileBottomDrawer>
     </>

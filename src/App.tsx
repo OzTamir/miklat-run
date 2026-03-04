@@ -47,8 +47,8 @@ function OverviewOpenButton() {
     <button
       type="button"
       onClick={() => setOverviewVisible(true)}
-      title="סקירת המסלול"
-      className="absolute left-0 top-1/2 z-10 -translate-y-1/2 rounded-r-lg border border-l-0 border-white/[0.08] bg-bg-surface px-2 py-3 text-[12px] font-medium text-text-secondary shadow-lg transition-colors hover:bg-bg-surface-2 hover:text-text-primary"
+      title="פתח סקירת מסלול"
+      className="absolute left-0 top-1/2 z-20 hidden -translate-y-1/2 rounded-r-lg border border-l-0 border-white/[0.12] bg-bg-surface px-2.5 py-3 text-[12px] font-semibold text-text-secondary shadow-lg transition-colors hover:bg-bg-surface-2 hover:text-text-primary md:block"
     >
       {'סקירה'}
     </button>

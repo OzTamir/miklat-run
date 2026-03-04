@@ -1,8 +1,12 @@
 import { useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { useAddressSearch } from '@/hooks/useAddressSearch';
+import { useRouteStore } from '@/stores/route-store';
 
 export function AddressSearch() {
+  const routeData = useRouteStore((s) => s.routeData);
+  const isStartPointLocked = routeData !== null;
+
   const {
     query,
     setQuery,
@@ -41,6 +45,7 @@ export function AddressSearch() {
             onChange={(e) => setQuery(e.target.value)}
             placeholder={'הקלד כתובת בתל אביב...'}
             dir="rtl"
+            disabled={isStartPointLocked}
             className="h-10 bg-bg-surface-2 border-white/[0.06] pr-10 text-center text-base placeholder:text-text-muted md:text-sm"
             autoComplete="off"
           />
@@ -79,7 +84,7 @@ export function AddressSearch() {
           </div>
         </div>
 
-        {showResults && results.length > 0 && (
+        {!isStartPointLocked && showResults && results.length > 0 && (
           <div className="absolute z-50 mt-1 w-full max-h-[200px] overflow-y-auto rounded-lg border border-white/[0.06] bg-bg-surface shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
             {results.map((result) => (
               <button
@@ -95,9 +100,15 @@ export function AddressSearch() {
         )}
       </div>
 
-      <p className="text-[12px] text-text-muted text-start">
-        {'או לחץ על המפה לבחירת נקודה'}
-      </p>
+      {isStartPointLocked ? (
+        <p className="text-[12px] text-text-muted text-start">
+          {'נקודת התחלה נעולה בזמן שמוצג מסלול. למסלול חדש לחץ "מסלול חדש".'}
+        </p>
+      ) : (
+        <p className="text-[12px] text-text-muted text-start">
+          {'או לחץ על המפה לבחירת נקודה'}
+        </p>
+      )}
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { useRouteStore } from '@/stores/route-store';
 import { reverseGeocode } from '@/lib/api';
 
 export function MapClickHandler() {
+  const routeData = useRouteStore((s) => s.routeData);
   const highlightedSegmentIdx = useRouteStore((s) => s.highlightedSegmentIdx);
   const resetSegmentHighlight = useRouteStore((s) => s.resetSegmentHighlight);
   const setStartPoint = useRouteStore((s) => s.setStartPoint);
@@ -14,10 +15,17 @@ export function MapClickHandler() {
         return;
       }
 
+      if (routeData) {
+        return;
+      }
+
       const { lat, lng } = e.latlng;
       setStartPoint({ lat, lng });
 
       reverseGeocode(lat, lng).then((result) => {
+        if (useRouteStore.getState().routeData) {
+          return;
+        }
         const addr = result.display_name;
         setStartPoint({ lat, lng }, addr);
       }).catch(() => {

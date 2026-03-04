@@ -23,7 +23,7 @@ export function DistanceMode() {
         value={[targetDistanceKm]}
         onValueChange={(val) => setTargetDistance(val[0])}
         min={1}
-        max={15}
+        max={42}
         step={0.5}
         dir="rtl"
         className="[&_[data-slot=slider-range]]:bg-accent [&_[data-slot=slider-thumb]]:border-accent"
@@ -31,7 +31,7 @@ export function DistanceMode() {
 
       <div className="flex justify-between text-[12px] text-text-muted">
         <span>{'1 ק"מ'}</span>
-        <span>{'15 ק"מ'}</span>
+        <span>{'42 ק"מ'}</span>
       </div>
     </div>
   );

@@ -9,6 +9,7 @@ import { DistanceMode } from './DistanceMode';
 import { PaceMode } from './PaceMode';
 import { RiskSlider } from './RiskSlider';
 import { GenerateButton } from './GenerateButton';
+import { PostRouteActions } from './PostRouteActions';
 import { RouteInfo } from './RouteInfo';
 import { HowItWorks } from './HowItWorks';
 import { SidebarFooter } from './SidebarFooter';
@@ -65,7 +66,7 @@ function SidebarHeader() {
           {'מסלול מוגן'}
         </h1>
         <p className="text-[13px] text-text-secondary">
-          {'תכנון ריצה בבטוחה בתל אביב'}
+          {'תכנון מסלול ריצה ששומר אותך קרוב למקלט'}
         </p>
       </div>
     </div>
@@ -79,29 +80,41 @@ interface SidebarProps {
 const TOP_GAP = 64;
 
 function DrawerSections({ children, includeFooter }: { children?: ReactNode; includeFooter?: boolean }) {
+  const routeData = useRouteStore((s) => s.routeData);
+
   return (
     <div data-sidebar-content className="flex flex-col gap-0">
-      <SidebarSection>
-        <AddressSearch />
-      </SidebarSection>
-      <SidebarSection>
-        <div className="text-[13px] font-medium text-text-primary mb-3 text-start">
-          {'תכנון מסלול'}
-        </div>
-        <ModeToggle />
-        <DistanceMode />
-        <PaceMode />
-        <RiskSlider />
-      </SidebarSection>
-      <SidebarSection>
-        <GenerateButton />
-      </SidebarSection>
-      <SidebarSection>
-        <RouteInfo />
-      </SidebarSection>
-      <SidebarSection>
-        <HowItWorks />
-      </SidebarSection>
+      {routeData ? (
+        <>
+          <SidebarSection>
+            <PostRouteActions />
+          </SidebarSection>
+          <SidebarSection>
+            <RouteInfo />
+          </SidebarSection>
+        </>
+      ) : (
+        <>
+          <SidebarSection>
+            <AddressSearch />
+          </SidebarSection>
+          <SidebarSection>
+            <div className="text-[13px] font-medium text-text-primary mb-3 text-start">
+              {'תכנון מסלול'}
+            </div>
+            <ModeToggle />
+            <DistanceMode />
+            <PaceMode />
+            <RiskSlider />
+          </SidebarSection>
+          <SidebarSection>
+            <GenerateButton />
+          </SidebarSection>
+          <SidebarSection>
+            <HowItWorks />
+          </SidebarSection>
+        </>
+      )}
       {children}
       {includeFooter ? <SidebarFooter /> : null}
     </div>

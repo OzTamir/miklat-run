@@ -5,6 +5,7 @@ export { DistanceMode } from './DistanceMode';
 export { PaceMode } from './PaceMode';
 export { RiskSlider } from './RiskSlider';
 export { GenerateButton } from './GenerateButton';
+export { PostRouteActions } from './PostRouteActions';
 export { RouteInfo } from './RouteInfo';
 export { HowItWorks } from './HowItWorks';
 export { SidebarFooter } from './SidebarFooter';

@@ -406,7 +406,7 @@ export async function searchForRoutes(
           break;
         }
 
-        onProgress?.(`מחדד מרחק יעד (${i + 1})...`);
+        onProgress?.(`מוודא תקינות מסלול (${i + 1})...`);
         const candidate = await evaluateScaleFactor(calibratedSf * localOffsets[i]);
         if (candidate) {
           pushCandidate(candidate);
