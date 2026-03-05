@@ -10,7 +10,7 @@ import {
   ROUTE_PLANNER_CONSTS,
   ROUTING_SHARED_CONSTS,
 } from '@/lib/routing/consts';
-import type { Shelter } from '@/types';
+import type { LatLng, Shelter } from '@/types';
 import type { GenerateRouteResult } from '@/lib/routing';
 
 interface UseRouteGenerationReturn {
@@ -36,6 +36,9 @@ const SHELTER_LOOKUP_PADDING_KM = 0.4;
 const SHELTER_LOOKUP_MIN_KM = 3;
 const SHELTER_LOOKUP_MAX_KM = 8;
 const NO_SHELTERS_ERROR = 'לא נמצאו מקלטים בקרבת נקודת ההתחלה';
+const START_POINT_SHELTER_ID = -1;
+const START_POINT_SHELTER_TYPE = 'מרחב מוגן אישי';
+const START_POINT_SHELTER_NOTES = 'סומן ידנית ממסך התכנון';
 
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
@@ -71,6 +74,37 @@ function computeShelterLookupRadiusKm(
   return round(clamp(radiusKm, SHELTER_LOOKUP_MIN_KM, SHELTER_LOOKUP_MAX_KM), 2);
 }
 
+function buildStartPointShelter(start: LatLng, startAddress: string): Shelter {
+  const trimmedAddress = startAddress.trim();
+  const fallbackAddress = `${start.lat.toFixed(5)}, ${start.lng.toFixed(5)}`;
+
+  return {
+    id: START_POINT_SHELTER_ID,
+    lat: start.lat,
+    lng: start.lng,
+    address: trimmedAddress || fallbackAddress,
+    type: START_POINT_SHELTER_TYPE,
+    status: 'open',
+    notes: START_POINT_SHELTER_NOTES,
+    area: 0,
+    open: 'כן',
+    hours: '',
+  };
+}
+
+function addStartPointShelter(
+  shelters: Shelter[],
+  startLatLng: LatLng | null,
+  startAddress: string,
+  enabled: boolean,
+): Shelter[] {
+  if (!enabled || !startLatLng) {
+    return shelters;
+  }
+
+  return [...shelters, buildStartPointShelter(startLatLng, startAddress)];
+}
+
 const useRouteGenerationState = create<RouteGenerationState>((set) => ({
   isGenerating: false,
   isRetry: false,
@@ -93,6 +127,8 @@ export function useRouteGeneration(): UseRouteGenerationReturn {
   const setConfirmationShelters = useRouteGenerationState((s) => s.setConfirmationShelters);
 
   const startLatLng = useRouteStore((s) => s.startLatLng);
+  const startAddress = useRouteStore((s) => s.startAddress);
+  const useStartPointAsShelter = useRouteStore((s) => s.useStartPointAsShelter);
   const routeMode = useRouteStore((s) => s.routeMode);
   const targetDistanceKm = useRouteStore((s) => s.targetDistanceKm);
   const allowedAvgShelterTimeSec = useRouteStore((s) => s.allowedAvgShelterTimeSec);
@@ -131,14 +167,28 @@ export function useRouteGeneration(): UseRouteGenerationReturn {
         radiusKm,
       });
 
-      if (nearby.length === 0) {
+      const routeShelters = addStartPointShelter(
+        nearby,
+        startLatLng,
+        startAddress,
+        useStartPointAsShelter,
+      );
+
+      if (routeShelters.length === 0) {
         throw new Error(NO_SHELTERS_ERROR);
       }
 
       setShelters(nearby);
-      return nearby;
+      return routeShelters;
     },
-    [startLatLng, shelters, allowedAvgShelterTimeSec, setShelters],
+    [
+      startLatLng,
+      startAddress,
+      shelters,
+      allowedAvgShelterTimeSec,
+      useStartPointAsShelter,
+      setShelters,
+    ],
   );
 
   const generate = useCallback(async (isRetryAttempt = false) => {

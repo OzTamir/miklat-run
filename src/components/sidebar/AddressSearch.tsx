@@ -5,7 +5,11 @@ import { useRouteStore } from '@/stores/route-store';
 
 export function AddressSearch() {
   const routeData = useRouteStore((s) => s.routeData);
+  const startLatLng = useRouteStore((s) => s.startLatLng);
+  const useStartPointAsShelter = useRouteStore((s) => s.useStartPointAsShelter);
+  const setUseStartPointAsShelter = useRouteStore((s) => s.setUseStartPointAsShelter);
   const isStartPointLocked = routeData !== null;
+  const canMarkStartAsShelter = Boolean(startLatLng) && !isStartPointLocked;
 
   const {
     query,
@@ -115,6 +119,23 @@ export function AddressSearch() {
           </div>
         )}
       </div>
+
+      <label
+        className={`flex items-center justify-center gap-3 rounded-lg border border-white/[0.06] bg-bg-surface-2 px-3 py-2 text-start transition-opacity ${
+          canMarkStartAsShelter ? '' : 'opacity-55'
+        }`}
+      >
+        <input
+          type="checkbox"
+          checked={useStartPointAsShelter}
+          onChange={(e) => setUseStartPointAsShelter(e.target.checked)}
+          disabled={!canMarkStartAsShelter}
+          className="size-4 cursor-pointer rounded border-white/25 bg-bg-surface text-accent accent-accent disabled:cursor-not-allowed"
+        />
+        <span className="text-[12px] leading-relaxed text-text-secondary">
+          {'החשב את נקודת ההתחלה כמרחב מוגן'}
+        </span>
+      </label>
 
       {isStartPointLocked ? (
         <p className="text-[12px] text-text-muted text-start">

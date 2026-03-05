@@ -28,6 +28,7 @@ interface PersistedSettings {
 interface RouteState {
   startLatLng: LatLng | null;
   startAddress: string;
+  useStartPointAsShelter: boolean;
 
   routeMode: RouteMode;
   targetDistanceKm: number;
@@ -49,6 +50,7 @@ interface RouteState {
   shelters: Shelter[];
 
   setStartPoint: (latlng: LatLng, address?: string) => void;
+  setUseStartPointAsShelter: (value: boolean) => void;
   setRouteMode: (mode: RouteMode) => void;
   setTargetDistance: (km: number) => void;
   setAllowedAvgShelterTimeSec: (sec: number) => void;
@@ -73,6 +75,7 @@ export const useRouteStore = create<RouteState>()(
     (set, get) => ({
   startLatLng: null,
   startAddress: '',
+  useStartPointAsShelter: false,
 
   routeMode: 'distance',
   targetDistanceKm: 5,
@@ -94,8 +97,17 @@ export const useRouteStore = create<RouteState>()(
   shelters: SHELTERS,
 
   setStartPoint: (latlng, address) => {
-    set({ startLatLng: latlng, startAddress: address ?? '' });
+    set({
+      startLatLng: latlng,
+      startAddress: address ?? '',
+      useStartPointAsShelter: false,
+    });
     trackEvent('Start Point Set');
+  },
+
+  setUseStartPointAsShelter: (value) => {
+    set({ useStartPointAsShelter: value });
+    trackEvent('Start Point Shelter Toggle', { enabled: value ? 'true' : 'false' });
   },
 
   setRouteMode: (mode) => {
