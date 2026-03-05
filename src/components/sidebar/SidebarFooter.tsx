@@ -22,7 +22,7 @@ export function SidebarFooter() {
     <div className="flex shrink-0 flex-col items-center gap-3 border-t border-white/[0.04] px-5 py-4 mb-4">
       <div className="flex items-center gap-3">
         <a
-          href="https://oztamir.com"
+          href="https://oztamir.com?utm_source=miklat-run"
           target="_blank"
           rel="noopener noreferrer"
           className="text-[12px] text-text-secondary hover:text-text-primary transition-colors text-center underline"
