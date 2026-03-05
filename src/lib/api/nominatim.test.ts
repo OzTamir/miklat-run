@@ -23,17 +23,26 @@ beforeEach(() => {
 })
 
 describe('searchAddress', () => {
-  it('constructs URL with encoded query and Tel Aviv suffix', async () => {
+  it('constructs URL with encoded query without forcing a city suffix', async () => {
     mockFetchResponse([])
 
     await searchAddress('דיזנגוף')
 
-    const expectedQuery = encodeURIComponent('דיזנגוף תל אביב')
+    const expectedQuery = encodeURIComponent('דיזנגוף')
     expect(getCalledUrl()).toContain(`q=${expectedQuery}`)
     expect(getCalledUrl()).toContain('format=json')
     expect(getCalledUrl()).toContain('limit=5')
     expect(getCalledUrl()).toContain('countrycodes=il')
     expect(getCalledUrl()).toContain('accept-language=he')
+  })
+
+  it('trims surrounding whitespace from search query', async () => {
+    mockFetchResponse([])
+
+    await searchAddress('   חיפה  ')
+
+    const expectedQuery = encodeURIComponent('חיפה')
+    expect(getCalledUrl()).toContain(`q=${expectedQuery}`)
   })
 
   it('sends required User-Agent header', async () => {

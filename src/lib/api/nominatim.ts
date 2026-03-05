@@ -3,7 +3,14 @@ import type { NominatimSearchResult, NominatimReverseResult } from '@/types'
 const USER_AGENT = 'MasluMugan/1.0'
 
 export async function searchAddress(query: string): Promise<NominatimSearchResult[]> {
-  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query + ' תל אביב')}&format=json&limit=5&countrycodes=il&accept-language=he`
+  const searchParams = new URLSearchParams({
+    q: query.trim(),
+    format: 'json',
+    limit: '5',
+    countrycodes: 'il',
+    'accept-language': 'he',
+  })
+  const url = `https://nominatim.openstreetmap.org/search?${searchParams.toString()}`
   
   const response = await fetch(url, {
     headers: {
