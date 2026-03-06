@@ -19,7 +19,9 @@ From `package.json`:
 
 | Script | Command | Purpose |
 |--------|---------|---------|
-| `dev` | `vite` | Start dev server with HMR |
+| `dev` | `bash scripts/dev.sh` | Start Vite HMR and `wrangler dev` together |
+| `dev:vite` | `vite` | Start only the Vite dev server |
+| `dev:wrangler` | `wrangler dev --local-protocol http` | Start only the Wrangler dev worker |
 | `build` | `tsc -b && vite build` | TypeScript check + production build |
 | `preview` | `vite preview` | Preview the production build locally |
 | `test` | `vitest run` | Run all tests once |

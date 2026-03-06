@@ -1,10 +1,12 @@
 {
-  "name": "miklat-vite-1jdb9t",
+  "name": "miklat-vite",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "bash scripts/dev.sh",
+    "dev:vite": "vite",
+    "dev:wrangler": "wrangler dev --local-protocol http --port 8794 --live-reload",
     "test": "vitest run",
     "test:watch": "vitest",
     "build": "tsc -b && vite build",
