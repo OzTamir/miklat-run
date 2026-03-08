@@ -4,6 +4,7 @@ import { create } from 'zustand';
 import { useRouteStore } from '@/stores/route-store';
 import { trackEvent } from '@/lib/analytics';
 import { fetchNearbyShelters } from '@/lib/api';
+import { haversine } from '@/lib/geo';
 import { generateRoute, buildLogicalSegments } from '@/lib/routing';
 import {
   RISK_TOLERANCE_CONSTS,
@@ -39,6 +40,9 @@ const NO_SHELTERS_ERROR = 'לא נמצאו מקלטים בקרבת נקודת ה
 const START_POINT_SHELTER_ID = -1;
 const START_POINT_SHELTER_TYPE = 'מרחב מוגן אישי';
 const START_POINT_SHELTER_NOTES = 'סומן ידנית ממסך התכנון';
+const END_POINT_SHELTER_ID = -2;
+const END_POINT_SHELTER_TYPE = 'מרחב מוגן אישי';
+const END_POINT_SHELTER_NOTES = 'סומן ידנית מנקודת הסיום';
 
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
@@ -59,6 +63,7 @@ function toRiskFactor(allowedAvgShelterTimeSec: number): number {
 function computeShelterLookupRadiusKm(
   targetKm: number,
   allowedAvgShelterTimeSec: number,
+  directDistanceM = 0,
 ): number {
   const riskFactor = toRiskFactor(allowedAvgShelterTimeSec);
   const loopRadiusM = (targetKm * ROUTING_SHARED_CONSTS.metersPerKilometer) / (
@@ -71,7 +76,13 @@ function computeShelterLookupRadiusKm(
   ) * (1 + ROUTE_PLANNER_CONSTS.riskSearchRadiusBoostRatio * riskFactor);
 
   const radiusKm = searchRadiusM / ROUTING_SHARED_CONSTS.metersPerKilometer + SHELTER_LOOKUP_PADDING_KM;
-  return round(clamp(radiusKm, SHELTER_LOOKUP_MIN_KM, SHELTER_LOOKUP_MAX_KM), 2);
+  const corridorRadiusKm = directDistanceM > 0
+    ? directDistanceM / (2 * ROUTING_SHARED_CONSTS.metersPerKilometer) + SHELTER_LOOKUP_PADDING_KM
+    : 0;
+  return round(
+    clamp(Math.max(radiusKm, corridorRadiusKm), SHELTER_LOOKUP_MIN_KM, SHELTER_LOOKUP_MAX_KM),
+    2,
+  );
 }
 
 function buildStartPointShelter(start: LatLng, startAddress: string): Shelter {
@@ -92,17 +103,44 @@ function buildStartPointShelter(start: LatLng, startAddress: string): Shelter {
   };
 }
 
-function addStartPointShelter(
+function buildEndPointShelter(end: LatLng, endAddress: string): Shelter {
+  const trimmedAddress = endAddress.trim();
+  const fallbackAddress = `${end.lat.toFixed(5)}, ${end.lng.toFixed(5)}`;
+
+  return {
+    id: END_POINT_SHELTER_ID,
+    lat: end.lat,
+    lng: end.lng,
+    address: trimmedAddress || fallbackAddress,
+    type: END_POINT_SHELTER_TYPE,
+    status: 'open',
+    notes: END_POINT_SHELTER_NOTES,
+    area: 0,
+    open: 'כן',
+    hours: '',
+  };
+}
+
+function addManualPointShelters(
   shelters: Shelter[],
   startLatLng: LatLng | null,
   startAddress: string,
-  enabled: boolean,
+  useStartPointAsShelter: boolean,
+  endLatLng: LatLng | null,
+  endAddress: string,
+  useEndPointAsShelter: boolean,
 ): Shelter[] {
-  if (!enabled || !startLatLng) {
-    return shelters;
+  const routeShelters = [...shelters];
+
+  if (useStartPointAsShelter && startLatLng) {
+    routeShelters.push(buildStartPointShelter(startLatLng, startAddress));
   }
 
-  return [...shelters, buildStartPointShelter(startLatLng, startAddress)];
+  if (useEndPointAsShelter && endLatLng) {
+    routeShelters.push(buildEndPointShelter(endLatLng, endAddress));
+  }
+
+  return routeShelters;
 }
 
 const useRouteGenerationState = create<RouteGenerationState>((set) => ({
@@ -128,7 +166,11 @@ export function useRouteGeneration(): UseRouteGenerationReturn {
 
   const startLatLng = useRouteStore((s) => s.startLatLng);
   const startAddress = useRouteStore((s) => s.startAddress);
+  const endLatLng = useRouteStore((s) => s.endLatLng);
+  const endAddress = useRouteStore((s) => s.endAddress);
+  const hasEndPoint = useRouteStore((s) => s.hasEndPoint);
   const useStartPointAsShelter = useRouteStore((s) => s.useStartPointAsShelter);
+  const useEndPointAsShelter = useRouteStore((s) => s.useEndPointAsShelter);
   const routeMode = useRouteStore((s) => s.routeMode);
   const targetDistanceKm = useRouteStore((s) => s.targetDistanceKm);
   const allowedAvgShelterTimeSec = useRouteStore((s) => s.allowedAvgShelterTimeSec);
@@ -160,18 +202,34 @@ export function useRouteGeneration(): UseRouteGenerationReturn {
         return shelters;
       }
 
-      const radiusKm = computeShelterLookupRadiusKm(targetKm, allowedAvgShelterTimeSec);
+      const directDistanceM = endLatLng
+        ? haversine(startLatLng.lat, startLatLng.lng, endLatLng.lat, endLatLng.lng)
+        : 0;
+      const lookupCenter = endLatLng
+        ? {
+          lat: (startLatLng.lat + endLatLng.lat) / 2,
+          lng: (startLatLng.lng + endLatLng.lng) / 2,
+        }
+        : startLatLng;
+      const radiusKm = computeShelterLookupRadiusKm(
+        targetKm,
+        allowedAvgShelterTimeSec,
+        directDistanceM,
+      );
       const nearby = await fetchNearbyShelters({
-        lat: startLatLng.lat,
-        lng: startLatLng.lng,
+        lat: lookupCenter.lat,
+        lng: lookupCenter.lng,
         radiusKm,
       });
 
-      const routeShelters = addStartPointShelter(
+      const routeShelters = addManualPointShelters(
         nearby,
         startLatLng,
         startAddress,
         useStartPointAsShelter,
+        hasEndPoint ? endLatLng : null,
+        hasEndPoint ? endAddress : '',
+        hasEndPoint && useEndPointAsShelter,
       );
 
       if (routeShelters.length === 0) {
@@ -184,9 +242,13 @@ export function useRouteGeneration(): UseRouteGenerationReturn {
     [
       startLatLng,
       startAddress,
+      endLatLng,
+      endAddress,
+      hasEndPoint,
       shelters,
       allowedAvgShelterTimeSec,
       useStartPointAsShelter,
+      useEndPointAsShelter,
       setShelters,
     ],
   );
@@ -203,11 +265,20 @@ export function useRouteGeneration(): UseRouteGenerationReturn {
     try {
       const targetKm =
         routeMode === 'distance' ? targetDistanceKm : computedDistanceKm();
+      const directDistanceM = hasEndPoint && endLatLng
+        ? haversine(startLatLng.lat, startLatLng.lng, endLatLng.lat, endLatLng.lng)
+        : 0;
+
+      if (hasEndPoint && endLatLng && targetKm * ROUTING_SHARED_CONSTS.metersPerKilometer < directDistanceM) {
+        toast.error('המרחק שנבחר קצר מהמרחק הישיר בין נקודת ההתחלה לנקודת הסיום');
+        return;
+      }
 
       const routeShelters = await resolveSheltersForRoute(targetKm);
 
       const result = await generateRoute({
         start: startLatLng,
+        end: hasEndPoint ? endLatLng : null,
         targetDistKm: targetKm,
         allowedAvgShelterTimeSec,
         isRetry: isRetryAttempt,
@@ -243,6 +314,8 @@ export function useRouteGeneration(): UseRouteGenerationReturn {
     startLatLng,
     routeMode,
     targetDistanceKm,
+    endLatLng,
+    hasEndPoint,
     allowedAvgShelterTimeSec,
     computedDistanceKm,
     setLoading,

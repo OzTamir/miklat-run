@@ -17,6 +17,9 @@ const STORAGE_KEY = 'miklat-run-settings';
 interface PersistedSettings {
   startLatLng: LatLng | null;
   startAddress: string;
+  endLatLng: LatLng | null;
+  endAddress: string;
+  hasEndPoint: boolean;
   routeMode: RouteMode;
   targetDistanceKm: number;
   allowedAvgShelterTimeSec: number;
@@ -28,7 +31,11 @@ interface PersistedSettings {
 interface RouteState {
   startLatLng: LatLng | null;
   startAddress: string;
+  endLatLng: LatLng | null;
+  endAddress: string;
+  hasEndPoint: boolean;
   useStartPointAsShelter: boolean;
+  useEndPointAsShelter: boolean;
 
   routeMode: RouteMode;
   targetDistanceKm: number;
@@ -50,7 +57,11 @@ interface RouteState {
   shelters: Shelter[];
 
   setStartPoint: (latlng: LatLng, address?: string) => void;
+  setEndPoint: (latlng: LatLng, address?: string) => void;
+  setHasEndPoint: (value: boolean) => void;
+  clearEndPoint: () => void;
   setUseStartPointAsShelter: (value: boolean) => void;
+  setUseEndPointAsShelter: (value: boolean) => void;
   setRouteMode: (mode: RouteMode) => void;
   setTargetDistance: (km: number) => void;
   setAllowedAvgShelterTimeSec: (sec: number) => void;
@@ -75,7 +86,11 @@ export const useRouteStore = create<RouteState>()(
     (set, get) => ({
   startLatLng: null,
   startAddress: '',
+  endLatLng: null,
+  endAddress: '',
+  hasEndPoint: false,
   useStartPointAsShelter: false,
+  useEndPointAsShelter: false,
 
   routeMode: 'distance',
   targetDistanceKm: 5,
@@ -105,9 +120,38 @@ export const useRouteStore = create<RouteState>()(
     trackEvent('Start Point Set');
   },
 
+  setEndPoint: (latlng, address) => {
+    set({
+      endLatLng: latlng,
+      endAddress: address ?? '',
+      hasEndPoint: true,
+      useEndPointAsShelter: false,
+    });
+    trackEvent('End Point Set');
+  },
+
+  setHasEndPoint: (value) => {
+    set((state) => ({
+      hasEndPoint: value,
+      endLatLng: value ? state.endLatLng : null,
+      endAddress: value ? state.endAddress : '',
+      useEndPointAsShelter: value ? state.useEndPointAsShelter : false,
+    }));
+    trackEvent('End Point Mode Toggle', { enabled: value ? 'true' : 'false' });
+  },
+
+  clearEndPoint: () => {
+    set({ endLatLng: null, endAddress: '', useEndPointAsShelter: false });
+  },
+
   setUseStartPointAsShelter: (value) => {
     set({ useStartPointAsShelter: value });
     trackEvent('Start Point Shelter Toggle', { enabled: value ? 'true' : 'false' });
+  },
+
+  setUseEndPointAsShelter: (value) => {
+    set({ useEndPointAsShelter: value });
+    trackEvent('End Point Shelter Toggle', { enabled: value ? 'true' : 'false' });
   },
 
   setRouteMode: (mode) => {
@@ -186,13 +230,19 @@ export const useRouteStore = create<RouteState>()(
     return timeMinutes / pacePerKm;
   },
 
-  canGenerate: () => get().startLatLng !== null,
+  canGenerate: () => {
+    const { startLatLng, hasEndPoint, endLatLng } = get();
+    return startLatLng !== null && (!hasEndPoint || endLatLng !== null);
+  },
 }),
     {
       name: STORAGE_KEY,
       partialize: (state): PersistedSettings => ({
         startLatLng: state.startLatLng,
         startAddress: state.startAddress,
+        endLatLng: state.endLatLng,
+        endAddress: state.endAddress,
+        hasEndPoint: state.hasEndPoint,
         routeMode: state.routeMode,
         targetDistanceKm: state.targetDistanceKm,
         allowedAvgShelterTimeSec: state.allowedAvgShelterTimeSec,

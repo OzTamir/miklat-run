@@ -15,7 +15,13 @@ interface UseAddressSearchReturn {
   clearResults: () => void;
 }
 
-export function useAddressSearch(): UseAddressSearchReturn {
+interface UseAddressSearchOptions {
+  target: 'start' | 'end';
+}
+
+export function useAddressSearch({
+  target,
+}: UseAddressSearchOptions): UseAddressSearchReturn {
   const [query, setQueryState] = useState('');
   const [results, setResults] = useState<NominatimSearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -23,13 +29,17 @@ export function useAddressSearch(): UseAddressSearchReturn {
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const setStartPoint = useRouteStore((s) => s.setStartPoint);
+  const setEndPoint = useRouteStore((s) => s.setEndPoint);
   const startAddress = useRouteStore((s) => s.startAddress);
+  const endAddress = useRouteStore((s) => s.endAddress);
   const routeData = useRouteStore((s) => s.routeData);
+  const selectedAddress = target === 'start' ? startAddress : endAddress;
+  const setPoint = target === 'start' ? setStartPoint : setEndPoint;
 
   // Sync external address changes (e.g., from map click) to local query state
   useEffect(() => {
-    setQueryState(startAddress);
-  }, [startAddress]);
+    setQueryState(selectedAddress);
+  }, [selectedAddress]);
 
   const setQuery = useCallback((value: string) => {
     if (routeData) {
@@ -69,7 +79,7 @@ export function useAddressSearch(): UseAddressSearchReturn {
         return;
       }
 
-      setStartPoint(
+      setPoint(
         { lat: parseFloat(result.lat), lng: parseFloat(result.lon) },
         result.display_name,
       );
@@ -77,7 +87,7 @@ export function useAddressSearch(): UseAddressSearchReturn {
       setResults([]);
       setShowResults(false);
     },
-    [routeData, setStartPoint],
+    [routeData, setPoint],
   );
 
   const clearResults = useCallback(() => {

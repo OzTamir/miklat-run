@@ -1,6 +1,11 @@
 export { analyzeRouteSafety, computeSafetyStats } from './safety-analyzer';
 export { buildLogicalSegments } from './segment-builder';
-export { planRouteWaypoints, tryBuildLoop, bridgeShelters } from './route-planner';
+export {
+  planRouteWaypoints,
+  planOpenRouteWaypoints,
+  tryBuildLoop,
+  bridgeShelters,
+} from './route-planner';
 export { searchForRoutes, selectClosestRoute, generateRoute } from './route-search';
 export {
   ROUTING_SHARED_CONSTS,

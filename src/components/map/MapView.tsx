@@ -3,6 +3,7 @@ import { MapController } from './MapController';
 import { MapClickHandler } from './MapClickHandler';
 import { ShelterSync } from './ShelterSync';
 import { StartMarker } from './StartMarker';
+import { EndMarker } from './EndMarker';
 import { ShelterMarkers } from './ShelterMarkers';
 import { ActiveShelterMarkers } from './ActiveShelterMarkers';
 import { RouteLayer } from './RouteLayer';
@@ -34,6 +35,7 @@ export function MapView() {
       <MapClickHandler />
       <ShelterSync />
       <StartMarker />
+      <EndMarker />
       <ShelterMarkers />
       <ActiveShelterMarkers />
       <RouteLayer />

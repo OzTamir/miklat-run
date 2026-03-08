@@ -107,6 +107,19 @@ describe('getOSRMRoute', () => {
     expect(coords).toEqual(['34.78,32.08', '34.79,32.09', '34.78,32.08'])
   })
 
+  it('keeps route open when closeLoop is disabled', async () => {
+    const waypoints: LatLng[] = [
+      { lat: 32.08, lng: 34.78 },
+      { lat: 32.09, lng: 34.79 },
+    ]
+    mockFetchResponse({ code: 'Ok', routes: [{ ...defaultRoute, legs: [] }] })
+
+    await getOSRMRoute(waypoints, { closeLoop: false })
+
+    const coords = getCoordsFromUrl(getCalledUrl())
+    expect(coords).toEqual(['34.78,32.08', '34.79,32.09'])
+  })
+
   it('parses successful OSRM response into RouteData', async () => {
     const step: OSRMStep = {
       distance: 120,

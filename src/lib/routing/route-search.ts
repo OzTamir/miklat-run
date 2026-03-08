@@ -263,6 +263,7 @@ export async function searchForRoutes(
   allowedAvgShelterTimeSec: number,
   extended: boolean,
   shelters: Shelter[],
+  end?: LatLng | null,
   onProgress?: (message: string) => void,
 ): Promise<RouteCandidate[]> {
   const candidates: RouteCandidate[] = [];
@@ -298,13 +299,14 @@ export async function searchForRoutes(
       targetDistM * normalized,
       shelters,
       riskFactor,
+      end,
     );
     const waypoints = optimizeWaypointsForContinuity(rawWaypoints, targetDistM, riskFactor);
     if (waypoints.length < 2) {
       return null;
     }
 
-    const routeData = await getOSRMRoute(waypoints);
+    const routeData = await getOSRMRoute(waypoints, { closeLoop: !end });
     return buildCandidate(routeData, targetDistM, normalized, riskFactor);
   };
 
@@ -483,6 +485,7 @@ export function selectClosestRoute(
 
 export interface GenerateRouteParams {
   start: LatLng;
+  end?: LatLng | null;
   targetDistKm: number;
   allowedAvgShelterTimeSec: number;
   isRetry: boolean;
@@ -500,6 +503,7 @@ export interface GenerateRouteResult {
 export async function generateRoute(params: GenerateRouteParams): Promise<GenerateRouteResult | null> {
   const {
     start,
+    end,
     targetDistKm,
     allowedAvgShelterTimeSec,
     isRetry,
@@ -515,6 +519,7 @@ export async function generateRoute(params: GenerateRouteParams): Promise<Genera
     allowedAvgShelterTimeSec,
     isRetry,
     shelters,
+    end,
     onProgress,
   );
   const bestRouteData = candidates.length > 0

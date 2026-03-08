@@ -1,6 +1,14 @@
 import type { LatLng, RouteData } from '@/types'
 
-export async function getOSRMRoute(waypoints: LatLng[]): Promise<RouteData> {
+interface GetOSRMRouteOptions {
+  closeLoop?: boolean
+}
+
+export async function getOSRMRoute(
+  waypoints: LatLng[],
+  options: GetOSRMRouteOptions = {},
+): Promise<RouteData> {
+  const { closeLoop = true } = options
   let pts = waypoints;
   
   // Simplify if more than 50 waypoints
@@ -21,9 +29,12 @@ export async function getOSRMRoute(waypoints: LatLng[]): Promise<RouteData> {
     }
   }
   
-  // Close the loop
-  const first = deduped[0], last = deduped[deduped.length - 1];
-  if (Math.abs(first.lat - last.lat) > 0.00001 || Math.abs(first.lng - last.lng) > 0.00001) deduped.push(first);
+  if (closeLoop) {
+    const first = deduped[0], last = deduped[deduped.length - 1];
+    if (Math.abs(first.lat - last.lat) > 0.00001 || Math.abs(first.lng - last.lng) > 0.00001) {
+      deduped.push(first);
+    }
+  }
   pts = deduped;
   
   if (pts.length < 2) throw new Error('Insufficient waypoints for route');

@@ -38,10 +38,14 @@ function getFitBoundsPadding(overviewVisible: boolean): L.FitBoundsOptions {
 export function MapController() {
   const map = useMap();
   const startLatLng = useRouteStore((s) => s.startLatLng);
+  const endLatLng = useRouteStore((s) => s.endLatLng);
+  const hasEndPoint = useRouteStore((s) => s.hasEndPoint);
+  const routeData = useRouteStore((s) => s.routeData);
   const computedSegments = useRouteStore((s) => s.computedSegments);
   const highlightedSegmentIdx = useRouteStore((s) => s.highlightedSegmentIdx);
   const overviewVisible = useRouteStore((s) => s.overviewVisible);
   const prevStartRef = useRef(startLatLng);
+  const prevEndRef = useRef(endLatLng);
   const prevHighlightRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -50,6 +54,23 @@ export function MapController() {
     }
     prevStartRef.current = startLatLng;
   }, [map, startLatLng]);
+
+  useEffect(() => {
+    if (!routeData && hasEndPoint && startLatLng && endLatLng) {
+      const bounds = L.latLngBounds([
+        [startLatLng.lat, startLatLng.lng],
+        [endLatLng.lat, endLatLng.lng],
+      ]);
+      map.fitBounds(bounds, { padding: [PADDING, PADDING], maxZoom: 15 });
+      prevEndRef.current = endLatLng;
+      return;
+    }
+
+    if (!routeData && endLatLng && endLatLng !== prevEndRef.current) {
+      map.flyTo([endLatLng.lat, endLatLng.lng], 15);
+    }
+    prevEndRef.current = endLatLng;
+  }, [map, startLatLng, endLatLng, hasEndPoint, routeData]);
 
   useEffect(() => {
     if (computedSegments.length === 0) return;
