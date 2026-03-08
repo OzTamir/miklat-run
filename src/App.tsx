@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { MapView, MapLegend } from '@/components/map';
 import { Sidebar } from '@/components/sidebar';
 import { RouteOverview } from '@/components/overview';
@@ -56,6 +57,12 @@ function OverviewOpenButton() {
 }
 
 function App() {
+  const theme = useRouteStore((s) => s.theme);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+  }, [theme]);
+
   return (
     <div
       dir="rtl"

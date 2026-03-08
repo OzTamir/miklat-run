@@ -12,6 +12,7 @@ import { SHELTERS } from '@/data';
 import { RISK_TOLERANCE_CONSTS } from '@/lib/routing';
 
 const STORAGE_KEY = 'miklat-run-settings';
+export type AppTheme = 'dark' | 'light';
 
 /** Settings we persist to localStorage (subset of RouteState) */
 interface PersistedSettings {
@@ -26,6 +27,7 @@ interface PersistedSettings {
   paceMin: number;
   paceSec: number;
   timeMinutes: number;
+  theme: AppTheme;
 }
 
 interface RouteState {
@@ -43,6 +45,7 @@ interface RouteState {
   paceMin: number;
   paceSec: number;
   timeMinutes: number;
+  theme: AppTheme;
 
   routeData: RouteData | null;
   computedSegments: RouteSegment[];
@@ -67,6 +70,7 @@ interface RouteState {
   setAllowedAvgShelterTimeSec: (sec: number) => void;
   setPace: (min: number, sec: number) => void;
   setTimeMinutes: (min: number) => void;
+  setTheme: (theme: AppTheme) => void;
   setRouteResult: (data: RouteData, segments: RouteSegment[]) => void;
   clearRoute: () => void;
   highlightSegment: (idx: number | null) => void;
@@ -98,6 +102,7 @@ export const useRouteStore = create<RouteState>()(
   paceMin: 6,
   paceSec: 0,
   timeMinutes: 30,
+  theme: 'dark',
 
   routeData: null,
   computedSegments: [],
@@ -172,6 +177,11 @@ export const useRouteStore = create<RouteState>()(
   setPace: (min, sec) => set({ paceMin: min, paceSec: sec }),
 
   setTimeMinutes: (min) => set({ timeMinutes: min }),
+
+  setTheme: (theme) => {
+    set({ theme });
+    trackEvent('Theme Changed', { theme });
+  },
 
   setRouteResult: (data, segments) =>
     set({
@@ -249,6 +259,7 @@ export const useRouteStore = create<RouteState>()(
         paceMin: state.paceMin,
         paceSec: state.paceSec,
         timeMinutes: state.timeMinutes,
+        theme: state.theme,
       }),
     }
   )

@@ -1,5 +1,5 @@
-import { useTheme } from 'next-themes';
 import { MapContainer, Pane, TileLayer, ZoomControl } from 'react-leaflet';
+import { useRouteStore } from '@/stores/route-store';
 import { MapController } from './MapController';
 import { MapClickHandler } from './MapClickHandler';
 import { ShelterSync } from './ShelterSync';
@@ -31,8 +31,7 @@ const BASEMAPS = {
 } as const;
 
 export function MapView() {
-  const { resolvedTheme } = useTheme();
-  const theme = resolvedTheme === 'light' ? 'light' : 'dark';
+  const theme = useRouteStore((s) => s.theme);
   const basemap = BASEMAPS[theme];
 
   return (
