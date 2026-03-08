@@ -110,7 +110,7 @@ export function RouteOverview() {
       {/* Desktop: left slide panel */}
       <div
         dir="rtl"
-        className={`fixed inset-y-0 left-0 z-20 hidden w-[320px] flex-col border-r app-border-soft bg-bg-surface shadow-[8px_0_32px_rgba(0,0,0,0.2)] transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] md:flex ${
+        className={`fixed inset-y-0 left-0 z-20 hidden w-[320px] flex-col overflow-hidden border-r app-border-soft bg-bg-surface shadow-[8px_0_32px_rgba(0,0,0,0.2)] transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] md:flex ${
           overviewVisible
             ? 'translate-x-0'
             : '-translate-x-full'
@@ -122,7 +122,7 @@ export function RouteOverview() {
           safePercent={safePercent}
           onClose={handleClose}
         />
-        <ScrollArea className="flex-1">
+        <ScrollArea className="min-h-0 flex-1">
           <div data-overview-content className="py-2">
             {computedSegments.map((seg) => (
               <SegmentCard
