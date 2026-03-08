@@ -1,4 +1,5 @@
-import { MapContainer, TileLayer, ZoomControl } from 'react-leaflet';
+import { useTheme } from 'next-themes';
+import { MapContainer, Pane, TileLayer, ZoomControl } from 'react-leaflet';
 import { MapController } from './MapController';
 import { MapClickHandler } from './MapClickHandler';
 import { ShelterSync } from './ShelterSync';
@@ -11,12 +12,29 @@ import { SegmentMarkers } from './SegmentMarkers';
 import { DirectionArrows } from './DirectionArrows';
 
 const TEL_AVIV_CENTER: [number, number] = [32.0853, 34.7818];
-const CARTO_DARK_URL =
-  'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png';
 const ATTRIBUTION =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>';
 
+const BASEMAPS = {
+  dark: {
+    baseUrl:
+      'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',
+    labelUrl:
+      'https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png',
+  },
+  light: {
+    baseUrl:
+      'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png',
+    labelUrl:
+      'https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png',
+  },
+} as const;
+
 export function MapView() {
+  const { resolvedTheme } = useTheme();
+  const theme = resolvedTheme === 'light' ? 'light' : 'dark';
+  const basemap = BASEMAPS[theme];
+
   return (
     <MapContainer
       center={TEL_AVIV_CENTER}
@@ -26,7 +44,8 @@ export function MapView() {
     >
       <ZoomControl position="topleft" />
       <TileLayer
-        url={CARTO_DARK_URL}
+        key={`${theme}-base`}
+        url={basemap.baseUrl}
         subdomains="abcd"
         maxZoom={19}
         attribution={ATTRIBUTION}
@@ -41,6 +60,19 @@ export function MapView() {
       <RouteLayer />
       <SegmentMarkers />
       <DirectionArrows />
+      <Pane
+        name="street-labels"
+        style={{ zIndex: 450, pointerEvents: 'none' }}
+      >
+        <TileLayer
+          key={`${theme}-labels`}
+          url={basemap.labelUrl}
+          pane="street-labels"
+          subdomains="abcd"
+          maxZoom={19}
+          attribution={ATTRIBUTION}
+        />
+      </Pane>
     </MapContainer>
   );
 }

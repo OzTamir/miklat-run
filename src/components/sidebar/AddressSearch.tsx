@@ -24,7 +24,7 @@ function FieldOption({
 }: FieldOptionProps) {
   return (
     <label
-      className={`flex items-center justify-center gap-3 rounded-md border border-white/[0.05] bg-black/10 px-3 py-2 text-start transition-opacity ${
+      className={`flex items-center justify-center gap-3 rounded-md border app-border-soft bg-bg-surface-2 px-3 py-2 text-start transition-opacity ${
         dimmed ? 'opacity-55' : ''
       }`}
     >
@@ -33,7 +33,7 @@ function FieldOption({
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
         disabled={disabled}
-        className="size-4 cursor-pointer rounded border-white/25 bg-bg-surface text-accent accent-accent disabled:cursor-not-allowed"
+        className="size-4 cursor-pointer rounded border-[color:var(--app-border-strong)] bg-bg-surface text-accent accent-accent disabled:cursor-not-allowed"
       />
       <span className="text-[12px] leading-relaxed text-text-secondary">{label}</span>
     </label>
@@ -83,7 +83,7 @@ function AddressField({
   }, [clearResults]);
 
   return (
-    <div className="space-y-2.5 rounded-xl border border-white/[0.06] bg-bg-surface-2/50 p-3">
+    <div className="space-y-2.5 rounded-xl border app-border-soft bg-bg-surface-2/70 p-3">
       <div className="text-[13px] font-medium text-text-primary text-start">
         {label}
       </div>
@@ -97,7 +97,7 @@ function AddressField({
               placeholder={'הקלד כתובת...'}
               dir="rtl"
               disabled={disabled}
-              className="h-10 border-white/[0.06] bg-bg-surface-2 pr-10 pl-10 text-center text-base placeholder:text-text-muted md:text-sm"
+              className="h-10 border-[color:var(--app-border-soft)] bg-bg-surface-2 pr-10 pl-10 text-center text-base placeholder:text-text-muted md:text-sm"
               autoComplete="off"
             />
             {!disabled && query.trim().length > 0 && (
@@ -158,7 +158,7 @@ function AddressField({
               size="icon"
               onClick={onUseCurrentLocation}
               disabled={disabled || isLocating}
-              className="h-10 w-10 shrink-0 border border-white/[0.06] bg-bg-surface-2 text-text-secondary hover:bg-bg-surface hover:text-text-primary"
+              className="h-10 w-10 shrink-0 border app-border-soft bg-bg-surface-2 text-text-secondary hover:bg-bg-surface hover:text-text-primary"
               aria-label="השתמש במיקום הנוכחי"
               title="השתמש במיקום הנוכחי"
             >
@@ -191,7 +191,7 @@ function AddressField({
         </div>
 
         {!disabled && showResults && results.length > 0 && (
-          <div className="absolute z-50 mt-1 max-h-[200px] w-full overflow-y-auto rounded-lg border border-white/[0.06] bg-bg-surface shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+          <div className="absolute z-50 mt-1 max-h-[200px] w-full overflow-y-auto rounded-lg border app-border-soft bg-bg-surface shadow-[0_8px_32px_rgba(0,0,0,0.25)]">
             {results.map((result) => (
               <button
                 key={result.place_id}

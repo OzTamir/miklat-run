@@ -25,7 +25,7 @@ export function ClickHint() {
 
   return (
     <div
-      className={`fixed bottom-[60px] left-1/2 z-[999] -translate-x-1/2 rounded-full border border-white/10 bg-bg-surface px-4 py-2 text-[13px] text-text-secondary shadow-default pointer-events-none transition-opacity duration-300 ${visible ? 'opacity-100' : 'opacity-0'}`}
+      className={`fixed bottom-[60px] left-1/2 z-[999] -translate-x-1/2 rounded-full border app-border-soft app-overlay-surface-strong px-4 py-2 text-[13px] text-text-secondary shadow-default pointer-events-none transition-opacity duration-300 ${visible ? 'opacity-100' : 'opacity-0'}`}
     >
       {`📍 ${message}`}
     </div>

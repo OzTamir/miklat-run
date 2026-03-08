@@ -1,5 +1,6 @@
 import { Github } from 'lucide-react';
 import { BuyMeACoffee } from './BuyMeACoffee';
+import { ThemeSelector } from './ThemeSelector';
 
 const GITHUB_URL = 'https://github.com/OzTamir/miklat-run';
 const SUPPORT_EMAIL = 'help@miklat.run';
@@ -8,7 +9,7 @@ const SUPPORT_EMAIL_URL = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
 
 export function SidebarFooter() {
   return (
-    <div className="flex shrink-0 flex-col items-center gap-3 border-t border-white/[0.04] px-5 py-4 mb-4">
+    <div className="mb-4 flex shrink-0 flex-col items-center gap-3 border-t app-border-soft px-5 py-4">
       <div className="flex items-center gap-3">
         <a
           href="https://oztamir.com?utm_source=miklat-run"
@@ -20,7 +21,7 @@ export function SidebarFooter() {
           <span className="line-through opacity-50">{'ב❤️'}</span>
           {' במקלט על ידי עוז תמיר'}
         </a>
-        <span className="text-[12px] text-text-secondary">|</span>
+        <span className="text-[10px] text-text-secondary/25">|</span>
         <a
           href={GITHUB_URL}
           target="_blank"
@@ -30,6 +31,8 @@ export function SidebarFooter() {
         >
           <Github className="size-5" />
         </a>
+        <span className="text-[10px] text-text-secondary/25">|</span>
+        <ThemeSelector />
       </div>
       <BuyMeACoffee />
       <div className="flex items-center gap-3">

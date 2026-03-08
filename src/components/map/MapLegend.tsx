@@ -7,7 +7,7 @@ export function MapLegend() {
     <>
       <div
         dir="rtl"
-        className="fixed bottom-4 left-4 z-20 hidden rounded-lg border border-white/10 bg-bg-surface/95 p-3 text-start shadow-default backdrop-blur-sm md:left-auto md:right-[356px] md:block"
+        className="fixed bottom-4 left-4 z-20 hidden rounded-lg border app-border-soft app-overlay-surface p-3 text-start shadow-default backdrop-blur-sm md:left-auto md:right-[356px] md:block"
       >
         <LegendContent />
       </div>
@@ -16,7 +16,7 @@ export function MapLegend() {
         type="button"
         onClick={() => setIsMobileLegendOpen(true)}
         aria-label="פתח מקרא"
-        className="fixed right-4 top-4 z-40 flex size-9 items-center justify-center rounded-full border border-white/15 bg-bg-surface/95 text-base font-semibold text-text-primary shadow-default backdrop-blur-sm md:hidden"
+        className="fixed right-4 top-4 z-40 flex size-9 items-center justify-center rounded-full border app-border-strong app-overlay-surface text-base font-semibold text-text-primary shadow-default backdrop-blur-sm md:hidden"
       >
         i
       </button>
@@ -28,7 +28,7 @@ export function MapLegend() {
           onClick={() => setIsMobileLegendOpen(false)}
         >
           <div
-            className="mx-auto mt-14 w-full max-w-xs rounded-lg border border-white/10 bg-bg-surface p-3 shadow-default"
+            className="mx-auto mt-14 w-full max-w-xs rounded-lg border app-border-soft bg-bg-surface p-3 shadow-default"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="mb-2 flex items-center justify-between">
@@ -54,7 +54,7 @@ function LegendContent() {
   return (
     <div className="flex flex-col gap-1.5 text-sm max-md:gap-1 max-md:text-[11px]">
       <LegendItem>
-        <span className="inline-block size-3 shrink-0 rounded-full border-2 border-white bg-green-500" />
+        <span className="inline-block size-3 shrink-0 rounded-full border-2 border-bg-surface bg-green-500" />
         <span>נקודת התחלה</span>
       </LegendItem>
 
@@ -64,7 +64,7 @@ function LegendContent() {
       </LegendItem>
 
       <LegendItem>
-        <span className="inline-block size-3 shrink-0 rounded-full border-2 border-white bg-accent" />
+        <span className="inline-block size-3 shrink-0 rounded-full border-2 border-bg-surface bg-accent" />
         <span>מקלט לאורך המסלול</span>
       </LegendItem>
 

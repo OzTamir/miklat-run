@@ -39,7 +39,7 @@ function SidebarHeader() {
           fill="#e8913a"
           opacity="0.9"
         />
-        <circle cx="18" cy="17" r="3" fill="#141b2d" />
+        <circle cx="18" cy="17" r="3" fill="var(--color-bg)" />
         <path
           d="M18 15v4M16 17h4"
           stroke="#e8913a"
@@ -109,8 +109,6 @@ function DrawerSections({ children, includeFooter }: { children?: ReactNode; inc
           </SidebarSection>
           <SidebarSection>
             <GenerateButton />
-          </SidebarSection>
-          <SidebarSection>
             <HowItWorks />
           </SidebarSection>
         </>
@@ -133,11 +131,14 @@ export function Sidebar({ children }: SidebarProps) {
   return (
     <>
       {/* Desktop: fixed right panel */}
-      <aside dir="rtl" className="hidden md:fixed md:inset-y-0 md:right-0 md:z-30 md:flex md:w-[340px] md:flex-col md:border-l md:border-white/[0.04] md:bg-bg-surface">
+      <aside
+        dir="rtl"
+        className="hidden md:fixed md:inset-y-0 md:right-0 md:z-30 md:flex md:w-[340px] md:flex-col md:border-l app-border-soft md:bg-bg-surface"
+      >
         <div className="px-5 py-4">
           <SidebarHeader />
         </div>
-        <Separator className="bg-white/[0.04]" />
+        <Separator className="app-divider" />
         <ScrollArea className="flex-1">
           <DrawerSections>{children}</DrawerSections>
         </ScrollArea>
@@ -157,7 +158,7 @@ export function Sidebar({ children }: SidebarProps) {
           zIndexClassName="z-40"
           handle={<SidebarHeader />}
         >
-          <Separator className="shrink-0 bg-white/[0.04]" />
+          <Separator className="shrink-0 app-divider" />
           <div
             className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch]"
           >
@@ -171,7 +172,7 @@ export function Sidebar({ children }: SidebarProps) {
 
 function SidebarSection({ children }: { children: ReactNode }) {
   return (
-    <div className="border-b border-white/[0.04] px-5 py-4 last:border-b-0">
+    <div className="border-b app-border-soft px-5 py-4 last:border-b-0 flex flex-col gap-2">
       {children}
     </div>
   );

@@ -251,7 +251,7 @@ export function MobileBottomDrawer({
       <aside
         ref={asideRef}
         dir="rtl"
-        className={`pointer-events-auto absolute inset-x-0 bottom-0 flex flex-col overflow-hidden rounded-t-2xl bg-bg-surface shadow-[0_-8px_32px_rgba(0,0,0,0.4)] transition-[transform,max-height] duration-300 ease-out ${asideClassName}`}
+        className={`pointer-events-auto absolute inset-x-0 bottom-0 flex flex-col overflow-hidden rounded-t-2xl bg-bg-surface shadow-[0_-8px_32px_rgba(0,0,0,0.28)] transition-[transform,max-height] duration-300 ease-out ${asideClassName}`}
         style={{
           maxHeight: expanded
             ? size === 'full'
@@ -270,7 +270,7 @@ export function MobileBottomDrawer({
           onTouchStart={onHandleTouchStart}
           className={handleContainerClassName}
         >
-          <div className="mb-3 h-1 w-9 self-center rounded-full bg-white/20" />
+          <div className="mb-3 h-1 w-9 self-center rounded-full bg-[color:var(--app-border-strong)]" />
           {handle}
         </div>
         {children}

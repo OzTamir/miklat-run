@@ -71,7 +71,7 @@ export function PaceMode() {
               setPace(n, paceSec);
               setPaceMinDraft(n.toString());
             }}
-            className="h-10 w-14 rounded-md border border-white/[0.06] bg-bg-surface-2 text-center text-lg font-medium text-text-primary outline-none focus:border-accent"
+            className="h-10 w-14 rounded-md border border-[color:var(--app-border-soft)] bg-bg-surface-2 text-center text-lg font-medium text-text-primary outline-none focus:border-accent"
           />
           <span className="text-xl font-bold text-text-muted">:</span>
           <input
@@ -96,7 +96,7 @@ export function PaceMode() {
               setPace(paceMin, n);
               setPaceSecDraft(n.toString().padStart(2, '0'));
             }}
-            className="h-10 w-14 rounded-md border border-white/[0.06] bg-bg-surface-2 text-center text-lg font-medium text-text-primary outline-none focus:border-accent"
+            className="h-10 w-14 rounded-md border border-[color:var(--app-border-soft)] bg-bg-surface-2 text-center text-lg font-medium text-text-primary outline-none focus:border-accent"
           />
         </div>
       </div>

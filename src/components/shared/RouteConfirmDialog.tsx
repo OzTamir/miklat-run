@@ -44,17 +44,17 @@ export function RouteConfirmDialog({
       }}
     >
       <AlertDialogContent
-        className="max-w-[380px] sm:max-w-[380px] border-white/10 bg-bg-surface p-7"
+        className="max-w-[380px] sm:max-w-[380px] border-[color:var(--app-border-strong)] bg-bg-surface p-7"
         dir="rtl"
       >
-        <AlertDialogHeader className="sm:place-items-center sm:text-center">
-          <div className="text-[36px] leading-none mb-3">
-            {'🏃'}
+        <AlertDialogHeader className="place-items-center text-center">
+          <div className="flex w-full flex-col items-center text-center">
+            <div className="mb-3 text-[36px] leading-none">{'🏃'}</div>
+            <AlertDialogTitle className="text-center text-lg font-semibold text-text-primary">
+              {'המסלול שנמצא שונה מהבקשה'}
+            </AlertDialogTitle>
           </div>
-          <AlertDialogTitle className="text-lg font-semibold text-text-primary">
-            {'המסלול שנמצא שונה מהבקשה'}
-          </AlertDialogTitle>
-          <AlertDialogDescription className="text-sm text-text-secondary leading-relaxed">
+          <AlertDialogDescription className="w-full text-center text-sm leading-relaxed text-text-secondary">
             {'בקשות '}
             <strong>
               {targetKm} {'ק"מ'}
@@ -85,7 +85,7 @@ export function RouteConfirmDialog({
           <div className="flex flex-col items-stretch gap-0.5">
             <AlertDialogAction
               variant="outline"
-              className="!bg-bg-surface-2 !text-text-primary !border-white/10 !font-medium !h-auto w-full py-3 text-sm"
+              className="!bg-bg-surface-2 !text-text-primary !border-[color:var(--app-border-soft)] !font-medium !h-auto w-full py-3 text-sm"
               onClick={(e) => {
                 e.preventDefault();
                 onAction('retry');

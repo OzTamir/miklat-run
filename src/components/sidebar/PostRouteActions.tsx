@@ -25,7 +25,7 @@ export function PostRouteActions() {
           clearRoute();
         }}
         disabled={isGenerating}
-        className="h-10 w-full border border-white/10 bg-bg-surface-2 text-[14px] font-semibold text-text-primary hover:bg-bg-surface-3"
+        className="h-10 w-full border app-border-soft bg-bg-surface-2 text-[14px] font-semibold text-text-primary hover:bg-bg-surface-3"
       >
         {'התחל מחדש'}
       </Button>

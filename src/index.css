@@ -5,25 +5,25 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-bg: #141b2d;
-  --color-bg-surface: #1a2237;
-  --color-bg-surface-2: #212b44;
-  --color-bg-surface-3: #2a3556;
+  --color-bg: var(--app-bg);
+  --color-bg-surface: var(--app-bg-surface);
+  --color-bg-surface-2: var(--app-bg-surface-2);
+  --color-bg-surface-3: var(--app-bg-surface-3);
 
-  --color-text-primary: #e8ecf4;
-  --color-text-secondary: #8b95a8;
-  --color-text-muted: #5c6578;
+  --color-text-primary: var(--app-text-primary);
+  --color-text-secondary: var(--app-text-secondary);
+  --color-text-muted: var(--app-text-muted);
 
-  --color-accent: #e8913a;
-  --color-accent-hover: #f0a050;
-  --color-accent-dim: rgba(232, 145, 58, 0.15);
+  --color-accent: var(--app-accent);
+  --color-accent-hover: var(--app-accent-hover);
+  --color-accent-dim: var(--app-accent-dim);
 
-  --color-safe: #3aba6f;
-  --color-caution: #e8c93a;
-  --color-danger: #e85a3a;
-  --color-safe-dim: rgba(58, 186, 111, 0.15);
-  --color-caution-dim: rgba(232, 201, 58, 0.15);
-  --color-danger-dim: rgba(232, 90, 58, 0.15);
+  --color-safe: var(--app-safe);
+  --color-caution: var(--app-caution);
+  --color-danger: var(--app-danger);
+  --color-safe-dim: var(--app-safe-dim);
+  --color-caution-dim: var(--app-caution-dim);
+  --color-danger-dim: var(--app-danger-dim);
 
   --font-sans: "Rubik", system-ui, sans-serif;
 
@@ -31,10 +31,16 @@
   --radius-lg: 12px;
 
   --transition-default: 180ms cubic-bezier(0.16, 1, 0.3, 1);
-  --shadow-default: 0 4px 24px rgba(0, 0, 0, 0.3);
+  --shadow-default: var(--app-shadow-default);
 }
 
 @layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
   html {
     font-family: var(--font-sans);
     background: var(--color-bg);
@@ -46,6 +52,8 @@
   }
   body {
     @apply bg-background text-foreground;
+    background: var(--color-bg);
+    color: var(--color-text-primary);
   }
 }
 
@@ -95,6 +103,34 @@
 }
 
 :root {
+  color-scheme: light;
+  --app-bg: #edf2f7;
+  --app-bg-surface: #ffffff;
+  --app-bg-surface-2: #f5f8fc;
+  --app-bg-surface-3: #e7eef7;
+
+  --app-text-primary: #162033;
+  --app-text-secondary: #4a5a73;
+  --app-text-muted: #708099;
+
+  --app-accent: #d67a25;
+  --app-accent-hover: #bf6717;
+  --app-accent-dim: rgba(214, 122, 37, 0.14);
+
+  --app-safe: #239f57;
+  --app-caution: #b79010;
+  --app-danger: #d34b30;
+  --app-safe-dim: rgba(35, 159, 87, 0.14);
+  --app-caution-dim: rgba(183, 144, 16, 0.14);
+  --app-danger-dim: rgba(211, 75, 48, 0.14);
+
+  --app-border-soft: rgba(22, 32, 51, 0.08);
+  --app-border-strong: rgba(22, 32, 51, 0.14);
+  --app-overlay-surface: rgba(255, 255, 255, 0.9);
+  --app-overlay-surface-strong: rgba(255, 255, 255, 0.96);
+  --app-map-backdrop: #dbe4ef;
+  --app-shadow-default: 0 12px 32px rgba(22, 32, 51, 0.12);
+
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);
@@ -130,6 +166,34 @@
 }
 
 .dark {
+  color-scheme: dark;
+  --app-bg: #0f1828;
+  --app-bg-surface: #172133;
+  --app-bg-surface-2: #1d2940;
+  --app-bg-surface-3: #293754;
+
+  --app-text-primary: #eef3fb;
+  --app-text-secondary: #b7c3d9;
+  --app-text-muted: #8d9ab1;
+
+  --app-accent: #e8913a;
+  --app-accent-hover: #f0a050;
+  --app-accent-dim: rgba(232, 145, 58, 0.16);
+
+  --app-safe: #3aba6f;
+  --app-caution: #e8c93a;
+  --app-danger: #e85a3a;
+  --app-safe-dim: rgba(58, 186, 111, 0.15);
+  --app-caution-dim: rgba(232, 201, 58, 0.15);
+  --app-danger-dim: rgba(232, 90, 58, 0.15);
+
+  --app-border-soft: rgba(255, 255, 255, 0.08);
+  --app-border-strong: rgba(255, 255, 255, 0.14);
+  --app-overlay-surface: rgba(23, 33, 51, 0.9);
+  --app-overlay-surface-strong: rgba(23, 33, 51, 0.96);
+  --app-map-backdrop: #111827;
+  --app-shadow-default: 0 16px 40px rgba(0, 0, 0, 0.35);
+
   --background: oklch(0.141 0.005 285.823);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.21 0.006 285.885);
@@ -161,4 +225,26 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.552 0.016 285.938);
+}
+
+@layer utilities {
+  .app-border-soft {
+    border-color: var(--app-border-soft);
+  }
+
+  .app-border-strong {
+    border-color: var(--app-border-strong);
+  }
+
+  .app-divider {
+    background-color: var(--app-border-soft);
+  }
+
+  .app-overlay-surface {
+    background-color: var(--app-overlay-surface);
+  }
+
+  .app-overlay-surface-strong {
+    background-color: var(--app-overlay-surface-strong);
+  }
 }

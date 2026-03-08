@@ -110,7 +110,7 @@ export function RouteOverview() {
       {/* Desktop: left slide panel */}
       <div
         dir="rtl"
-        className={`fixed inset-y-0 left-0 z-20 hidden w-[320px] flex-col border-r border-white/[0.06] bg-bg-surface shadow-[8px_0_32px_rgba(0,0,0,0.25)] transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] md:flex ${
+        className={`fixed inset-y-0 left-0 z-20 hidden w-[320px] flex-col border-r app-border-soft bg-bg-surface shadow-[8px_0_32px_rgba(0,0,0,0.2)] transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] md:flex ${
           overviewVisible
             ? 'translate-x-0'
             : '-translate-x-full'
@@ -153,7 +153,7 @@ export function RouteOverview() {
         topGap={64}
         halfRatio={0.5}
         zIndexClassName="z-40"
-        asideClassName="border-t border-white/[0.08]"
+        asideClassName="border-t app-border-soft"
         handleContainerClassName="flex w-full shrink-0 cursor-pointer flex-col items-stretch px-0 pt-2 touch-none"
         handle={(
           <OverviewHeader
@@ -204,7 +204,7 @@ function OverviewActions({
   onExportGpx: () => void;
 }) {
   return (
-    <div className="shrink-0 border-t border-white/[0.06] px-5 py-4">
+    <div className="shrink-0 border-t app-border-soft px-5 py-4">
       {includeRouteControls ? (
         <div className="grid grid-cols-2 gap-2">
           <button
@@ -219,7 +219,7 @@ function OverviewActions({
             type="button"
             onClick={onStartOver}
             disabled={isGenerating}
-            className="h-11 rounded-lg border border-white/10 bg-bg-surface-2 text-[15px] font-semibold text-text-primary transition-colors hover:bg-bg-surface-3 disabled:opacity-50"
+            className="h-11 rounded-lg border app-border-soft bg-bg-surface-2 text-[15px] font-semibold text-text-primary transition-colors hover:bg-bg-surface-3 disabled:opacity-50"
           >
             {'מסלול חדש'}
           </button>
@@ -250,7 +250,7 @@ function OverviewHeader({
   onClose: () => void;
 }) {
   return (
-    <div className="flex shrink-0 items-center justify-between border-b border-white/[0.06] bg-bg px-5 py-4">
+    <div className="flex shrink-0 items-center justify-between border-b app-border-soft bg-bg px-5 py-4">
       <div className="flex flex-col gap-1 text-start">
         <h2 className="text-[16px] font-semibold text-text-primary">
           {'סקירת המסלול'}

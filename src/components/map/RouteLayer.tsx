@@ -70,8 +70,8 @@ function AnimatedSegmentOverlay() {
       positions={seg.polyCoords}
       pathOptions={{
         color: '#ffffff',
-        weight: 4,
-        opacity: 0.55,
+        weight: 3,
+        opacity: 0.42,
         dashArray: `${DASH} ${GAP}`,
         lineCap: 'round',
         lineJoin: 'round',
@@ -102,8 +102,8 @@ export function RouteLayer() {
             positions={group.positions}
             pathOptions={{
               color: group.color,
-              weight: isHighlighted ? 7 : 5,
-              opacity: isDimmed ? 0.25 : isHighlighted ? 1.0 : 0.85,
+              weight: isHighlighted ? 6 : 4,
+              opacity: isDimmed ? 0.22 : isHighlighted ? 0.96 : 0.78,
               lineCap: 'round',
               lineJoin: 'round',
             }}
