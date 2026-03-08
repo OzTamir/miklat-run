@@ -2,6 +2,9 @@ import { Github } from 'lucide-react';
 import { BuyMeACoffee } from './BuyMeACoffee';
 
 const GITHUB_URL = 'https://github.com/OzTamir/miklat-run';
+const SUPPORT_EMAIL = 'help@miklat.run';
+const SUPPORT_EMAIL_SUBJECT = 'מסלול מוגן - טופס יצירת קשר';
+const SUPPORT_EMAIL_URL = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(SUPPORT_EMAIL_SUBJECT)}`;
 
 export function SidebarFooter() {
   return (
@@ -30,7 +33,7 @@ export function SidebarFooter() {
       </div>
       <BuyMeACoffee />
       <div className="flex items-center gap-3">
-        <a href="mailto:help@miklat.run" className="text-[12px] text-text-secondary hover:text-text-primary transition-colors text-center underline">
+        <a href={SUPPORT_EMAIL_URL} className="text-[12px] text-text-secondary hover:text-text-primary transition-colors text-center underline">
           {'בעיות? תקלות? הצעות? שלחו לי מייל!'}
         </a>
       </div>
