@@ -133,13 +133,13 @@ export function Sidebar({ children }: SidebarProps) {
       {/* Desktop: fixed right panel */}
       <aside
         dir="rtl"
-        className="hidden md:fixed md:inset-y-0 md:right-0 md:z-30 md:flex md:w-[340px] md:flex-col md:border-l app-border-soft md:bg-bg-surface"
+        className="hidden md:fixed md:inset-y-0 md:right-0 md:z-30 md:flex md:w-[340px] md:flex-col md:overflow-hidden md:border-l app-border-soft md:bg-bg-surface"
       >
         <div className="px-5 py-4">
           <SidebarHeader />
         </div>
         <Separator className="app-divider" />
-        <ScrollArea className="flex-1">
+        <ScrollArea className="min-h-0 flex-1">
           <DrawerSections>{children}</DrawerSections>
         </ScrollArea>
         <SidebarFooter />
